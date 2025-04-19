@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Edit2, Trash2, RefreshCw } from 'lucide-react';
 import { Cake } from '../../types';
+import SearchBar from '../../components/admin/SearchBar';
+import FilterDropdown from '../../components/admin/FilterDropdown';
+import ReportButton from '../../components/admin/ReportButton';
+import { formatReportData } from '../../../server/utils/reportGenerator';
 
 const StockManagement: React.FC = () => {
   const [cakes, setCakes] = useState<Cake[]>([]);
@@ -9,6 +13,10 @@ const StockManagement: React.FC = () => {
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingCake, setEditingCake] = useState<Cake | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [availabilityFilter, setAvailabilityFilter] = useState('all');
+  const [priceFilter, setPriceFilter] = useState('all');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -103,6 +111,34 @@ const StockManagement: React.FC = () => {
     }
   };
 
+  const filterCakes = (cakes: Cake[]) => {
+    return cakes.filter(cake => {
+      const matchesSearch = 
+        cake.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cake.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCategory = 
+        categoryFilter === 'all' || cake.category === categoryFilter;
+
+      const matchesAvailability =
+        availabilityFilter === 'all' ||
+        (availabilityFilter === 'available' && cake.isAvailable) ||
+        (availabilityFilter === 'unavailable' && !cake.isAvailable);
+
+      const price = cake.price;
+      const matchesPrice =
+        priceFilter === 'all' ||
+        (priceFilter === 'under25' && price < 25) ||
+        (priceFilter === '25to50' && price >= 25 && price <= 50) ||
+        (priceFilter === 'over50' && price > 50);
+
+      return matchesSearch && matchesCategory && matchesAvailability && matchesPrice;
+    });
+  };
+
+  const filteredCakes = filterCakes(cakes);
+  const categories = Array.from(new Set(cakes.map(cake => cake.category)));
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -116,6 +152,11 @@ const StockManagement: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Stock Management</h1>
         <div className="flex space-x-4">
+          <ReportButton
+            data={filteredCakes}
+            filename="products-report"
+            formatData={formatReportData.products}
+          />
           <button
             onClick={() => fetchCakes()}
             className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
@@ -138,6 +179,47 @@ const StockManagement: React.FC = () => {
           {error}
         </div>
       )}
+
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search cakes..."
+        />
+        
+        <FilterDropdown
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+          options={[
+            { value: 'all', label: 'All Categories' },
+            ...categories.map(cat => ({ value: cat, label: cat }))
+          ]}
+          label="Category"
+        />
+
+        <FilterDropdown
+          value={availabilityFilter}
+          onChange={setAvailabilityFilter}
+          options={[
+            { value: 'all', label: 'All Status' },
+            { value: 'available', label: 'Available' },
+            { value: 'unavailable', label: 'Out of Stock' }
+          ]}
+          label="Availability"
+        />
+
+        <FilterDropdown
+          value={priceFilter}
+          onChange={setPriceFilter}
+          options={[
+            { value: 'all', label: 'All Prices' },
+            { value: 'under25', label: 'Under $25' },
+            { value: '25to50', label: '$25 - $50' },
+            { value: 'over50', label: 'Over $50' }
+          ]}
+          label="Price Range"
+        />
+      </div>
 
       {showForm && (
         <div className="mb-6 bg-white rounded-lg shadow p-6">
@@ -294,7 +376,7 @@ const StockManagement: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {cakes.map((cake) => (
+            {filteredCakes.map((cake) => (
               <tr key={cake._id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <img

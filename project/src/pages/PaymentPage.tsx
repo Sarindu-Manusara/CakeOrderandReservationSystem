@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { CreditCard, Calendar, Truck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { formatCurrency } from '../../server/utils/FormatCurrency';
 
 interface OrderDetails {
   _id: string;
@@ -165,13 +166,13 @@ const PaymentPage: React.FC = () => {
                 {order.orderItems.map((item, index) => (
                   <div key={index} className="flex justify-between">
                     <span>{item.name} x {item.quantity}</span>
-                    <span>${(item.price * item.quantity).toFixed(2)}</span>
+                    <span>{formatCurrency(item.price * item.quantity)}</span>
                   </div>
                 ))}
                 <div className="border-t pt-3 mt-3">
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>${order.totalPrice.toFixed(2)}</span>
+                    <span>{formatCurrency(order.totalPrice)}</span>
                   </div>
                 </div>
               </div>
@@ -265,7 +266,7 @@ const PaymentPage: React.FC = () => {
                 disabled={processing}
                 className="w-full mt-6 bg-primary-500 text-white py-3 px-4 rounded-md hover:bg-primary-600 transition-colors disabled:opacity-50"
               >
-                {processing ? 'Processing...' : `Pay $${order.totalPrice.toFixed(2)}`}
+                {processing ? 'Processing...' : `Pay ${formatCurrency(order.totalPrice)}`}
               </button>
             </form>
 

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ShoppingCart, Trash2, ChevronUp, ChevronDown, Calendar } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { formatCurrency } from '../../server/utils/FormatCurrency';
 
 interface CartItem {
   _id: string;
@@ -243,7 +244,7 @@ const CartPage: React.FC = () => {
                       </button>
                     </div>
                     <span className="font-semibold">
-                      ${((item.isCustom ? item.customCake?.price : item.cake?.price) || 0).toFixed(2)}
+                      {formatCurrency((item.isCustom ? item.customCake?.price : item.cake?.price) || 0)}
                     </span>
                     <button 
                       onClick={() => removeItem(item._id)}
@@ -265,23 +266,23 @@ const CartPage: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${calculateTotal().toFixed(2)}</span>
+                <span>{formatCurrency(calculateTotal())}</span>
               </div>
               {orderType === 'delivery' && (
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>$5.00</span>
+                  <span>{formatCurrency(500)}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span>Tax (10%)</span>
-                <span>${(calculateTotal() * 0.1).toFixed(2)}</span>
+                <span>{formatCurrency(calculateTotal() * 0.1)}</span>
               </div>
               <div className="border-t pt-3 mt-3">
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Total</span>
                   <span>
-                    ${(calculateTotal() + (orderType === 'delivery' ? 5.00 : 0) + (calculateTotal() * 0.1)).toFixed(2)}
+                    {formatCurrency(calculateTotal() + (orderType === 'delivery' ? 500 : 0) + (calculateTotal() * 0.1))}
                   </span>
                 </div>
               </div>

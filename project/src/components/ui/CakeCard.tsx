@@ -4,6 +4,7 @@ import { useContext } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import CartContext from '../../context/CartContext';
 import { Cake } from '../../types';
+import { formatCurrency } from '../../../server/utils/FormatCurrency';
 
 interface CakeCardProps {
   cake: Cake;
@@ -56,7 +57,7 @@ const CakeCard: React.FC<CakeCardProps> = ({ cake }) => {
         
         <div className="flex justify-between items-center">
           <span className="text-lg font-semibold text-secondary-800">
-            ${cake.price.toFixed(2)}
+            {formatCurrency(cake.price)}
           </span>
           
           {cake.isAvailable ? (

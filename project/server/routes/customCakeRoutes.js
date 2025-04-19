@@ -1,6 +1,6 @@
 import express from 'express';
-import { createCustomCake, getCustomCakes, getAllCustomCakes } from '../controllers/customCakeController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { createCustomCake, getCustomCakes, getAllCustomCakes, deleteCustomCake } from '../controllers/customCakeController.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -9,5 +9,7 @@ router.route('/')
   .get(protect, getCustomCakes);
 
   router.route('/all').get(protect, getAllCustomCakes);
+
+  router.route('/:id').delete(protect, admin , deleteCustomCake);
 
 export default router;

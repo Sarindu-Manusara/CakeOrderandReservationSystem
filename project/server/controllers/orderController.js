@@ -217,6 +217,27 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+// @desc    Delete an order
+// @route   DELETE /api/orders/:id
+// @access  Private/Admin
+const deleteOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    await order.deleteOne(); // <-- FIXED: use deleteOne instead of remove
+
+    res.json({ message: 'Order removed successfully' });
+  } catch (error) {
+    console.error('❌ Error deleting order:', error);
+    res.status(500).json({ message: 'Server error while deleting order' });
+  }
+};
+
+
 export {
   addOrderItems,
   getOrderById,
@@ -226,4 +247,5 @@ export {
   getOrders,
   updateOrderStatus,
   cancelOrder,
+  deleteOrder,
 };

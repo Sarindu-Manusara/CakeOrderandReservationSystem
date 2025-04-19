@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { RefreshCw, Eye, RotateCcw } from 'lucide-react';
+import { RefreshCw, Eye, RotateCcw, Download } from 'lucide-react';
+import SearchBar from '../../components/admin/SearchBar';
+import FilterDropdown from '../../components/admin/FilterDropdown';
+import ReportButton from '../../components/admin/ReportButton';
+import { formatReportData } from '../../../server/utils/reportGenerator';
 
 interface Payment {
   _id: string;
@@ -19,6 +23,7 @@ interface Payment {
   cardLast4: string;
   createdAt: string;
   refundReason?: string;
+  paymentMethod: string;
 }
 
 const PaymentManagement: React.FC = () => {
@@ -28,6 +33,13 @@ const PaymentManagement: React.FC = () => {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [refundReason, setRefundReason] = useState('');
+
+  // Search and Filter States
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
+  const [amountFilter, setAmountFilter] = useState('all');
+  const [methodFilter, setMethodFilter] = useState('all');
 
   useEffect(() => {
     fetchPayments();
@@ -67,6 +79,43 @@ const PaymentManagement: React.FC = () => {
     }
   };
 
+  const filterPayments = (payments: Payment[]) => {
+    return payments.filter(payment => {
+      // Search filter
+      const matchesSearch = 
+        payment.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        payment.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        payment.transactionId.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Status filter
+      const matchesStatus = 
+        statusFilter === 'all' || payment.status === statusFilter;
+
+      // Date filter
+      const paymentDate = new Date(payment.createdAt);
+      const now = new Date();
+      const matchesDate =
+        dateFilter === 'all' ||
+        (dateFilter === 'today' && paymentDate.toDateString() === now.toDateString()) ||
+        (dateFilter === 'week' && paymentDate >= new Date(now.setDate(now.getDate() - 7))) ||
+        (dateFilter === 'month' && paymentDate >= new Date(now.setMonth(now.getMonth() - 1)));
+
+      // Amount filter
+      const amount = payment.amount;
+      const matchesAmount =
+        amountFilter === 'all' ||
+        (amountFilter === 'under50' && amount < 50) ||
+        (amountFilter === '50to100' && amount >= 50 && amount <= 100) ||
+        (amountFilter === 'over100' && amount > 100);
+
+      // Payment method filter
+      const matchesMethod =
+        methodFilter === 'all' || payment.paymentMethod === methodFilter;
+
+      return matchesSearch && matchesStatus && matchesDate && matchesAmount && matchesMethod;
+    });
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
@@ -82,6 +131,8 @@ const PaymentManagement: React.FC = () => {
     }
   };
 
+  const filteredPayments = filterPayments(payments);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -94,13 +145,20 @@ const PaymentManagement: React.FC = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Payment Management</h1>
-        <button
-          onClick={fetchPayments}
-          className="flex items-center px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600"
-        >
-          <RefreshCw size={18} className="mr-2" />
-          Refresh
-        </button>
+        <div className="flex space-x-4">
+          <ReportButton
+            data={filteredPayments}
+            filename="payments-report"
+            formatData={formatReportData.payments}
+          />
+          <button
+            onClick={fetchPayments}
+            className="flex items-center px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600"
+          >
+            <RefreshCw size={18} className="mr-2" />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -108,6 +166,62 @@ const PaymentManagement: React.FC = () => {
           {error}
         </div>
       )}
+
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4">
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search payments..."
+        />
+        
+        <FilterDropdown
+          value={statusFilter}
+          onChange={setStatusFilter}
+          options={[
+            { value: 'all', label: 'All Statuses' },
+            { value: 'completed', label: 'Completed' },
+            { value: 'pending', label: 'Pending' },
+            { value: 'failed', label: 'Failed' },
+            { value: 'refunded', label: 'Refunded' }
+          ]}
+          label="Status"
+        />
+
+        <FilterDropdown
+          value={dateFilter}
+          onChange={setDateFilter}
+          options={[
+            { value: 'all', label: 'All Time' },
+            { value: 'today', label: 'Today' },
+            { value: 'week', label: 'This Week' },
+            { value: 'month', label: 'This Month' }
+          ]}
+          label="Date Range"
+        />
+
+        <FilterDropdown
+          value={amountFilter}
+          onChange={setAmountFilter}
+          options={[
+            { value: 'all', label: 'All Amounts' },
+            { value: 'under50', label: 'Under $50' },
+            { value: '50to100', label: '$50 - $100' },
+            { value: 'over100', label: 'Over $100' }
+          ]}
+          label="Amount Range"
+        />
+
+        <FilterDropdown
+          value={methodFilter}
+          onChange={setMethodFilter}
+          options={[
+            { value: 'all', label: 'All Methods' },
+            { value: 'credit_card', label: 'Credit Card' },
+            { value: 'debit_card', label: 'Debit Card' }
+          ]}
+          label="Payment Method"
+        />
+      </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full">
@@ -123,7 +237,7 @@ const PaymentManagement: React.FC = () => {
                 Amount
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Card
+                Method
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
@@ -137,7 +251,7 @@ const PaymentManagement: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {payments.map((payment) => (
+            {filteredPayments.map((payment) => (
               <tr key={payment._id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {payment.transactionId}
@@ -149,8 +263,8 @@ const PaymentManagement: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   ${payment.amount.toFixed(2)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  **** {payment.cardLast4}
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {payment.paymentMethod === 'credit_card' ? 'Credit Card' : 'Debit Card'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(payment.status)}`}>

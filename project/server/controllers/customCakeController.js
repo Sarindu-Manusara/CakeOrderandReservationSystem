@@ -94,10 +94,28 @@ const getAllCustomCakes = async (req, res) => {
   }
 };
 
+const deleteCustomCake = async (req, res) => {
+  try {
+    const customCake = await CustomCake.findById(req.params.id);
+
+    if (!customCake) {
+      return res.status(404).json({ message: 'Custom Cake not found' });
+    }
+
+    await customCake.deleteOne(); // <-- FIXED: use deleteOne instead of remove
+
+    res.json({ message: 'Custom Cake removed successfully' });
+  } catch (error) {
+    console.error('❌ Error deleting Custom Cake:', error);
+    res.status(500).json({ message: 'Server error while deleting Custom Cake' });
+  }
+};
+
 
 
 export {
   createCustomCake,
   getCustomCakes,
-  getAllCustomCakes
+  getAllCustomCakes,
+  deleteCustomCake
 };

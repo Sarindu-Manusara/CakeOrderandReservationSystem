@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -44,43 +43,41 @@ function App() {
       } />
 
       {/* Regular User Routes */}
-      <Route path="/" element={
-        <>
-          <Header />
-          <main className="flex-grow">
-            <Routes>
-              <Route index element={<HomePage />} />
-              <Route path="/cakes" element={<CakesPage />} />
-              <Route path="/cakes/:id" element={<CakeDetailPage />} />
-              <Route path="/custom-cake" element={<CustomCakePage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              
-              {/* Protected Routes */}
-              <Route path="/payment/:id" element={
-                <ProtectedRoute>
-                  <PaymentPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/checkout" element={
-                <ProtectedRoute>
-                  <CheckoutPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } />
-              
-              {/* 404 Page */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </main>
-          <Footer />
-        </>
-      } />
+      <Route path="*" element={
+  <>
+    <Header />
+    <main className="flex-grow">
+      <Routes>
+        <Route index element={<HomePage />} />
+        <Route path="cakes" element={<CakesPage />} />
+        <Route path="cakes/:id" element={<CakeDetailPage />} />
+        <Route path="custom-cake" element={<CustomCakePage />} />
+        <Route path="cart" element={<CartPage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
+
+        <Route path="payment/:id" element={
+          <ProtectedRoute>
+            <PaymentPage />
+          </ProtectedRoute>
+        } />
+        <Route path="checkout" element={
+          <ProtectedRoute>
+            <CheckoutPage />
+          </ProtectedRoute>
+        } />
+        <Route path="profile" element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        } />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </main>
+    <Footer />
+  </>
+} />
+
     </Routes>
   );
 }

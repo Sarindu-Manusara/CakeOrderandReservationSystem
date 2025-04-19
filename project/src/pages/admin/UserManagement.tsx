@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { RefreshCw, Edit2, Trash2, UserCheck, UserX } from 'lucide-react';
+import SearchBar from '../../components/admin/SearchBar';
+import FilterDropdown from '../../components/admin/FilterDropdown';
+import ReportButton from '../../components/admin/ReportButton';
+import { formatReportData } from '../../../server/utils/reportGenerator';
 
 interface User {
   _id: string;
@@ -22,6 +26,12 @@ const UserManagement: React.FC = () => {
     email: '',
     isAdmin: false
   });
+
+  // Search and Filter States
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('name');
 
   useEffect(() => {
     fetchUsers();
@@ -81,6 +91,42 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  const filterUsers = (users: User[]) => {
+    return users.filter(user => {
+      const matchesSearch = 
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesRole = 
+        roleFilter === 'all' ||
+        (roleFilter === 'admin' && user.isAdmin) ||
+        (roleFilter === 'user' && !user.isAdmin);
+
+      const userDate = new Date(user.createdAt);
+      const now = new Date();
+      const matchesDate =
+        dateFilter === 'all' ||
+        (dateFilter === 'today' && userDate.toDateString() === now.toDateString()) ||
+        (dateFilter === 'week' && userDate >= new Date(now.setDate(now.getDate() - 7))) ||
+        (dateFilter === 'month' && userDate >= new Date(now.setMonth(now.getMonth() - 1)));
+
+      return matchesSearch && matchesRole && matchesDate;
+    }).sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'email':
+          return a.email.localeCompare(b.email);
+        case 'date':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        default:
+          return 0;
+      }
+    });
+  };
+
+  const filteredUsers = filterUsers(users);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -93,13 +139,20 @@ const UserManagement: React.FC = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">User Management</h1>
-        <button
-          onClick={fetchUsers}
-          className="flex items-center px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600"
-        >
-          <RefreshCw size={18} className="mr-2" />
-          Refresh
-        </button>
+        <div className="flex space-x-4">
+          <ReportButton
+            data={filteredUsers}
+            filename="users-report"
+            formatData={formatReportData.users}
+          />
+          <button
+            onClick={fetchUsers}
+            className="flex items-center px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600"
+          >
+            <RefreshCw size={18} className="mr-2" />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -107,6 +160,48 @@ const UserManagement: React.FC = () => {
           {error}
         </div>
       )}
+
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search users..."
+        />
+        
+        <FilterDropdown
+          value={roleFilter}
+          onChange={setRoleFilter}
+          options={[
+            { value: 'all', label: 'All Roles' },
+            { value: 'admin', label: 'Admins' },
+            { value: 'user', label: 'Users' }
+          ]}
+          label="Role"
+        />
+
+        <FilterDropdown
+          value={dateFilter}
+          onChange={setDateFilter}
+          options={[
+            { value: 'all', label: 'All Time' },
+            { value: 'today', label: 'Today' },
+            { value: 'week', label: 'This Week' },
+            { value: 'month', label: 'This Month' }
+          ]}
+          label="Join Date"
+        />
+
+        <FilterDropdown
+          value={sortBy}
+          onChange={setSortBy}
+          options={[
+            { value: 'name', label: 'Sort by Name' },
+            { value: 'email', label: 'Sort by Email' },
+            { value: 'date', label: 'Sort by Date' }
+          ]}
+          label="Sort By"
+        />
+      </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full">
@@ -130,7 +225,7 @@ const UserManagement: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <tr key={user._id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{user.name}</div>

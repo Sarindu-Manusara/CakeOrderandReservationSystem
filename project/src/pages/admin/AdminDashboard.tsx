@@ -88,33 +88,6 @@ const AdminDashboard: React.FC = () => {
           </div>
         </Link>
       </div>
-
-      {/* Quick Stats */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h4 className="text-sm font-medium text-gray-500 mb-2">Total Orders</h4>
-          <div className="text-2xl font-bold">0</div>
-          <div className="text-xs text-gray-500 mt-1">Last 30 days</div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h4 className="text-sm font-medium text-gray-500 mb-2">Revenue</h4>
-          <div className="text-2xl font-bold">$0.00</div>
-          <div className="text-xs text-gray-500 mt-1">Last 30 days</div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h4 className="text-sm font-medium text-gray-500 mb-2">Active Users</h4>
-          <div className="text-2xl font-bold">0</div>
-          <div className="text-xs text-gray-500 mt-1">Total registered users</div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h4 className="text-sm font-medium text-gray-500 mb-2">Custom Orders</h4>
-          <div className="text-2xl font-bold">0</div>
-          <div className="text-xs text-gray-500 mt-1">Pending custom orders</div>
-        </div>
-      </div>
     </div>
   );
 };

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { Eye, Trash2, RefreshCw } from 'lucide-react';
+import SearchBar from '../../components/admin/SearchBar';
+import FilterDropdown from '../../components/admin/FilterDropdown';
+import ReportButton from '../../components/admin/ReportButton';
+import { formatReportData } from '../../../server/utils/reportGenerator';
 
 interface Order {
   _id: string;
@@ -26,7 +30,10 @@ const OrderManagement: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
 
   useEffect(() => {
     fetchOrders();
@@ -34,7 +41,6 @@ const OrderManagement: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      console.log('Token being sent:', localStorage.getItem('token'));
       const { data } = await axios.get('/api/orders', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -72,16 +78,37 @@ const OrderManagement: React.FC = () => {
     }
   };
 
-  const filteredOrders = orders.filter(order => {
-    switch (filter) {
-      case 'delivery':
-        return !order.isReservation;
-      case 'reservation':
-        return order.isReservation;
-      default:
-        return true;
-    }
-  });
+  const filterOrders = (orders: Order[]) => {
+    return orders.filter(order => {
+      const matchesSearch = 
+        order.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order._id.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus = 
+        statusFilter === 'all' ||
+        (statusFilter === 'pending' && !order.isPaid) ||
+        (statusFilter === 'paid' && order.isPaid && !order.isDelivered) ||
+        (statusFilter === 'delivered' && order.isDelivered);
+
+      const matchesType =
+        typeFilter === 'all' ||
+        (typeFilter === 'delivery' && !order.isReservation) ||
+        (typeFilter === 'reservation' && order.isReservation);
+
+      const orderDate = new Date(order.createdAt);
+      const now = new Date();
+      const matchesDate =
+        dateFilter === 'all' ||
+        (dateFilter === 'today' && orderDate.toDateString() === now.toDateString()) ||
+        (dateFilter === 'week' && orderDate >= new Date(now.setDate(now.getDate() - 7))) ||
+        (dateFilter === 'month' && orderDate >= new Date(now.setMonth(now.getMonth() - 1)));
+
+      return matchesSearch && matchesStatus && matchesType && matchesDate;
+    });
+  };
+
+  const filteredOrders = filterOrders(orders);
 
   if (loading) {
     return (
@@ -95,13 +122,20 @@ const OrderManagement: React.FC = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Order Management</h1>
-        <button
-          onClick={() => fetchOrders()}
-          className="flex items-center px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600"
-        >
-          <RefreshCw size={18} className="mr-2" />
-          Refresh
-        </button>
+        <div className="flex space-x-4">
+          <ReportButton
+            data={filteredOrders}
+            filename="orders-report"
+            formatData={formatReportData.orders}
+          />
+          <button
+            onClick={fetchOrders}
+            className="flex items-center px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600"
+          >
+            <RefreshCw size={18} className="mr-2" />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -110,16 +144,47 @@ const OrderManagement: React.FC = () => {
         </div>
       )}
 
-      <div className="mb-4">
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="px-4 py-2 border rounded-md"
-        >
-          <option value="all">All Orders</option>
-          <option value="delivery">Delivery Orders</option>
-          <option value="reservation">Reservations</option>
-        </select>
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search orders..."
+        />
+        
+        <FilterDropdown
+          value={statusFilter}
+          onChange={setStatusFilter}
+          options={[
+            { value: 'all', label: 'All Statuses' },
+            { value: 'pending', label: 'Pending' },
+            { value: 'paid', label: 'Paid' },
+            { value: 'delivered', label: 'Delivered' }
+          ]}
+          label="Status"
+        />
+
+        <FilterDropdown
+          value={typeFilter}
+          onChange={setTypeFilter}
+          options={[
+            { value: 'all', label: 'All Types' },
+            { value: 'delivery', label: 'Delivery' },
+            { value: 'reservation', label: 'Reservation' }
+          ]}
+          label="Type"
+        />
+
+        <FilterDropdown
+          value={dateFilter}
+          onChange={setDateFilter}
+          options={[
+            { value: 'all', label: 'All Time' },
+            { value: 'today', label: 'Today' },
+            { value: 'week', label: 'This Week' },
+            { value: 'month', label: 'This Month' }
+          ]}
+          label="Date Range"
+        />
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">

@@ -5,23 +5,13 @@ import { motion } from 'framer-motion';
 import { CakeSlice, Calendar, CheckSquare } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-
-interface FormValues {
-  size: string;
-  flavor: string;
-  frosting: string;
-  decorations: string[];
-  message: string;
-  specialRequests: string;
-  deliveryDate: string;
-  isReservation: boolean;
-}
+import { formatCurrency } from '../../server/utils/FormatCurrency';
 
 const sizeOptions = [
-  { id: 'small', name: 'Small (6")', price: 45 },
-  { id: 'medium', name: 'Medium (8")', price: 55 },
-  { id: 'large', name: 'Large (10")', price: 65 },
-  { id: 'xlarge', name: 'Extra Large (12")', price: 75 },
+  { id: 'small', name: 'Small (6")', price: 4500 },
+  { id: 'medium', name: 'Medium (8")', price: 5500 },
+  { id: 'large', name: 'Large (10")', price: 6500 },
+  { id: 'xlarge', name: 'Extra Large (12")', price: 7500 },
 ];
 
 const flavorOptions = [
@@ -57,6 +47,8 @@ const decorationOptions = [
   'Drip Design',
 ];
 
+
+
 const CustomCakePage: React.FC = () => {
   const { register, handleSubmit, control, watch, formState: { errors } } = useForm<FormValues>({
     defaultValues: {
@@ -87,7 +79,7 @@ const CustomCakePage: React.FC = () => {
 
   const calculatePrice = () => {
     let total = selectedSizePrice;
-    total += watchDecorations.length * 5;
+    total += watchDecorations.length * 500; // 500 LKR per decoration
     return total;
   };
 
@@ -199,10 +191,9 @@ const CustomCakePage: React.FC = () => {
                         {sizeOptions.map((size) => (
                           <label 
                             key={size.id} 
-                            className={`
-                              relative border rounded-lg p-4 cursor-pointer flex flex-col items-center text-center transition-all
-                              ${watchSize === size.id ? 'border-primary-500 bg-primary-50' : 'border-accent-200 hover:border-primary-300'}
-                            `}
+                            className={`relative border rounded-lg p-4 cursor-pointer flex flex-col items-center text-center transition-all ${
+                              watchSize === size.id ? 'border-primary-500 bg-primary-50' : 'border-accent-200 hover:border-primary-300'
+                            }`}
                           >
                             <input
                               type="radio"
@@ -212,7 +203,7 @@ const CustomCakePage: React.FC = () => {
                             />
                             <CakeSlice size={24} className={`mb-2 ${watchSize === size.id ? 'text-primary-500' : 'text-accent-400'}`} />
                             <span className="font-medium text-sm">{size.name}</span>
-                            <span className="text-accent-600 text-sm">${size.price}</span>
+                            <span className="text-accent-600 text-sm">{formatCurrency(size.price)}</span>
                             {watchSize === size.id && (
                               <div className="absolute top-2 right-2 text-primary-500">
                                 <CheckSquare size={16} />
@@ -319,7 +310,7 @@ const CustomCakePage: React.FC = () => {
                           )}
                         />
                       </div>
-                      <p className="text-sm text-accent-500 mt-2">Each decoration adds $5 to the total price</p>
+                      <div className="text-xs text-accent-500 mt-2">Each decoration adds {formatCurrency(500)} to the total price</div>
                     </div>
                     
                     {/* Message */}
@@ -380,7 +371,7 @@ const CustomCakePage: React.FC = () => {
                         <span>
                           {sizeOptions.find(size => size.id === watchSize)?.name}
                           <span className="ml-2 text-accent-500">
-                            (${sizeOptions.find(size => size.id === watchSize)?.price})
+                            ({formatCurrency(sizeOptions.find(size => size.id === watchSize)?.price || 0)})
                           </span>
                         </span>
                       </div>
@@ -400,7 +391,7 @@ const CustomCakePage: React.FC = () => {
                             : 'None'}
                           {watchDecorations.length > 0 && (
                             <span className="ml-2 text-accent-500">
-                              (${watchDecorations.length * 5})
+                              ({formatCurrency(watchDecorations.length * 500)})
                             </span>
                           )}
                         </span>
@@ -422,7 +413,7 @@ const CustomCakePage: React.FC = () => {
                       
                       <div className="flex items-center justify-between font-semibold text-lg">
                         <span>Total Price:</span>
-                        <span>${calculatePrice().toFixed(2)}</span>
+                        <span>{formatCurrency(calculatePrice())}</span>
                       </div>
                     </div>
                     
@@ -535,7 +526,7 @@ const CustomCakePage: React.FC = () => {
                 <h4 className="font-medium mb-2">Estimated Price</h4>
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total:</span>
-                  <span>${calculatePrice().toFixed(2)}</span>
+                  <span>{formatCurrency(calculatePrice())}</span>
                 </div>
                 <p className="text-xs text-accent-500 mt-2">
                   Price includes size and selected decorations
