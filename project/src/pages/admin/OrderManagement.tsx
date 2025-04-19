@@ -34,6 +34,7 @@ const OrderManagement: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
+      console.log('Token being sent:', localStorage.getItem('token'));
       const { data } = await axios.get('/api/orders', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });

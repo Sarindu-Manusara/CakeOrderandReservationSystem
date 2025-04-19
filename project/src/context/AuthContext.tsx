@@ -12,7 +12,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, isAdminLogin?: boolean) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -46,52 +46,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
-  // Set up axios interceptors
   useEffect(() => {
-    // Request interceptor
-    const requestInterceptor = axios.interceptors.request.use(
-      (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      }
-    );
-
-    // Response interceptor
-    const responseInterceptor = axios.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        if (error.response?.status === 401) {
-          localStorage.removeItem('token');
-          setUser(null);
-          setIsAuthenticated(false);
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    // Clean up interceptors
-    return () => {
-      axios.interceptors.request.eject(requestInterceptor);
-      axios.interceptors.response.eject(responseInterceptor);
-    };
-  }, []);
-
-  useEffect(() => {
-    const checkAuth = async () => {
+    const initAuth = async () => {
       const token = localStorage.getItem('token');
-      if (token) {
+      const userStr = localStorage.getItem('user');
+      
+      if (token && userStr) {
         try {
-          const response = await axios.get('/api/users/profile');
-          setUser(response.data);
+          const savedUser = JSON.parse(userStr);
+          setUser(savedUser);
           setIsAuthenticated(true);
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          
+          // Verify token validity
+          await axios.get('/api/users/profile');
         } catch (err) {
+          // Token is invalid or expired
           localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          delete axios.defaults.headers.common['Authorization'];
           setUser(null);
           setIsAuthenticated(false);
         }
@@ -99,14 +72,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
     };
 
-    checkAuth();
+    initAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, isAdminLogin = false) => {
     try {
       const response = await axios.post('/api/users/login', { email, password });
-      localStorage.setItem('token', response.data.token);
-      setUser(response.data);
+      
+      // For admin login, verify admin status
+      if (isAdminLogin && !response.data.isAdmin) {
+        throw new Error('Unauthorized: Admin access required');
+      }
+
+      const { token, ...userData } = response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setUser(userData);
       setIsAuthenticated(true);
     } catch (err: any) {
       throw err;
@@ -116,8 +98,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (name: string, email: string, password: string) => {
     try {
       const response = await axios.post('/api/users/register', { name, email, password });
-      localStorage.setItem('token', response.data.token);
-      setUser(response.data);
+      const { token, ...userData } = response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setUser(userData);
       setIsAuthenticated(true);
     } catch (err: any) {
       throw err;
@@ -126,9 +111,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
     setUser(null);
     setIsAuthenticated(false);
   };
+
+  // Set up axios interceptor for handling 401 responses
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      response => response,
+      error => {
+        if (error.response?.status === 401) {
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, []);
 
   return (
     <AuthContext.Provider value={{

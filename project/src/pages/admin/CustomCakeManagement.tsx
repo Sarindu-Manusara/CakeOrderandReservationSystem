@@ -32,17 +32,31 @@ const CustomCakeManagement: React.FC = () => {
   }, []);
 
   const fetchCustomCakes = async () => {
+    const token = localStorage.getItem('token');
+  
+    if (!token) {
+      setError('No token found. Please log in.');
+      setLoading(false);
+      return;
+    }
+  
     try {
-      const { data } = await axios.get('/api/custom-cakes', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      console.log('Sending token:', token);
+  
+      const { data } = await axios.get('/api/custom-cakes/all', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       setCustomCakes(data);
     } catch (err: any) {
+      console.error(err);
       setError(err.response?.data?.message || 'Failed to fetch custom cakes');
     } finally {
       setLoading(false);
     }
   };
+  
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this custom cake?')) return;

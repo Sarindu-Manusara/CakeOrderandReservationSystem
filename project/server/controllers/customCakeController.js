@@ -65,14 +65,39 @@ const createCustomCake = async (req, res) => {
 // @access  Private
 const getCustomCakes = async (req, res) => {
   try {
+    console.log('📦 Fetching custom cakes for user:', req.user?._id);
+
     const customCakes = await CustomCake.find({ user: req.user._id });
+
+    console.log('🎂 Found custom cakes:', customCakes.length);
     res.json(customCakes);
   } catch (error) {
+    console.error('❌ Error in getCustomCakes:', error.message);
     res.status(500).json({ message: error.message });
   }
 };
 
+// @desc    Get all custom cakes (admin or management view)
+// @route   GET /api/custom-cakes/all
+// @access  Private (ideally with admin middleware)
+const getAllCustomCakes = async (req, res) => {
+  try {
+    console.log('📦 Fetching ALL custom cakes');
+
+    const customCakes = await CustomCake.find().populate('user', 'name email');
+
+    console.log('🎂 Total custom cakes found:', customCakes.length);
+    res.json(customCakes);
+  } catch (error) {
+    console.error('❌ Error in getAllCustomCakes:', error.message);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
 export {
   createCustomCake,
-  getCustomCakes
+  getCustomCakes,
+  getAllCustomCakes
 };

@@ -1,10 +1,11 @@
 import jwt from 'jsonwebtoken';
 
-const generateToken = (id) => {
-  // In a real application, you would use a proper secret from environment variables
+const generateToken = (userId) => {
   const secret = process.env.JWT_SECRET || 'your_jwt_secret';
-  return jwt.sign({ id }, secret, {
-    expiresIn: '30d',
+
+  // Sign the token with the user ID payload
+  return jwt.sign({ id: userId }, secret, {
+    expiresIn: '30d', // Token valid for 30 days
   });
 };
 
