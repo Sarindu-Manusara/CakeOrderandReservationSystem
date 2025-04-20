@@ -11,6 +11,10 @@ export interface Cake {
   sizes: string[];
   rating: number;
   reviews: Review[];
+  stock: number;
+  weatherSensitive: boolean;
+  minimumStock: number;
+  maximumStock: number;
 }
 
 export interface Review {

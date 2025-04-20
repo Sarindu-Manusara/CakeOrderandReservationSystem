@@ -54,7 +54,11 @@ const createCake = async (req, res) => {
       flavors,
       sizes,
       isAvailable,
-      featured
+      featured,
+      weatherSensitive,
+      minimumStock,
+      maximumStock,
+      stock
     } = req.body;
 
     const cake = new Cake({
@@ -67,7 +71,11 @@ const createCake = async (req, res) => {
       flavors,
       sizes,
       isAvailable: isAvailable || true,
-      featured: featured || false
+      featured: featured || false,
+      weatherSensitive: weatherSensitive || false,
+      minimumStock: minimumStock || 5,
+      maximumStock: maximumStock || 50,
+      stock: stock || 10
     });
 
     const createdCake = await cake.save();
@@ -91,7 +99,11 @@ const updateCake = async (req, res) => {
       flavors,
       sizes,
       isAvailable,
-      featured
+      featured,
+      weatherSensitive,
+      minimumStock,
+      maximumStock,
+      stock
     } = req.body;
 
     const cake = await Cake.findById(req.params.id);
@@ -106,6 +118,10 @@ const updateCake = async (req, res) => {
       cake.sizes = sizes || cake.sizes;
       cake.isAvailable = isAvailable !== undefined ? isAvailable : cake.isAvailable;
       cake.featured = featured !== undefined ? featured : cake.featured;
+      cake.weatherSensitive = weatherSensitive !== undefined ? weatherSensitive : cake.weatherSensitive;
+      cake.minimumStock = minimumStock !== undefined ? minimumStock : cake.minimumStock;
+      cake.maximumStock = maximumStock !== undefined ? maximumStock : cake.maximumStock;
+      cake.stock = stock !== undefined ? stock : cake.stock;
 
       const updatedCake = await cake.save();
       res.json(updatedCake);

@@ -4,6 +4,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { scheduleStockAdjustment } from './services/weatherStockService.js';
 
 // Routes
 import userRoutes from './routes/userRoutes.js';
@@ -12,6 +13,11 @@ import orderRoutes from './routes/orderRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import customCakeRoutes from './routes/customCakeRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import weatherRoutes from './routes/weatherRoutes.js';
+
+
+
+
 
 // Config
 dotenv.config();
@@ -30,6 +36,9 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/custom-cakes', customCakeRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/weather', weatherRoutes);
+
+
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === 'production') {
@@ -72,7 +81,27 @@ const connectDB = async () => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  connectDB();
-});
+const startServer = async () => {
+  try {
+    const conn = await mongoose.connect(MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+
+    // Start the server only after DB is connected
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      
+      // Start weather-based stock adjustment scheduler
+      scheduleStockAdjustment();
+    });
+
+  } catch (error) {
+    console.error(`❌ DB Connection Error: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+startServer();
+

@@ -21,7 +21,12 @@ const mockCakes: Cake[] = [
     flavors: ['chocolate', 'fudge'],
     sizes: ['small', 'medium', 'large'],
     rating: 4.8,
-    reviews: []
+    reviews: [],
+    featured: false,
+    stock: 0,
+    weatherSensitive: false,
+    minimumStock: 0,
+    maximumStock: 0
   },
   {
     _id: '2',
@@ -34,7 +39,12 @@ const mockCakes: Cake[] = [
     flavors: ['vanilla'],
     sizes: ['small', 'medium', 'large'],
     rating: 4.5,
-    reviews: []
+    reviews: [],
+    featured: false,
+    stock: 0,
+    weatherSensitive: false,
+    minimumStock: 0,
+    maximumStock: 0
   },
   {
     _id: '3',
@@ -47,7 +57,12 @@ const mockCakes: Cake[] = [
     flavors: ['red velvet'],
     sizes: ['medium', 'large'],
     rating: 4.7,
-    reviews: []
+    reviews: [],
+    featured: false,
+    stock: 0,
+    weatherSensitive: false,
+    minimumStock: 0,
+    maximumStock: 0
   }
 ];
 
@@ -58,7 +73,7 @@ const HomePage: React.FC = () => {
   
   useEffect(() => {
     // When backend is ready, uncomment this to fetch real data
-    /*
+    
     const fetchFeaturedCakes = async () => {
       try {
         setLoading(true);
@@ -72,7 +87,7 @@ const HomePage: React.FC = () => {
     };
     
     fetchFeaturedCakes();
-    */
+    
   }, []);
   
   return (

@@ -63,6 +63,11 @@ const cakeSchema = mongoose.Schema(
       required: true,
       default: 0,
     },
+    stock: {
+      type: Number,
+      required: true,
+      default: 10,
+    },
     isAvailable: {
       type: Boolean,
       required: true,
@@ -71,6 +76,18 @@ const cakeSchema = mongoose.Schema(
     featured: {
       type: Boolean,
       default: false,
+    },
+    weatherSensitive: {
+      type: Boolean,
+      default: false,
+    },
+    minimumStock: {
+      type: Number,
+      default: 5,
+    },
+    maximumStock: {
+      type: Number,
+      default: 50,
     },
   },
   {
