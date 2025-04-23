@@ -412,9 +412,9 @@ const StockManagement: React.FC = () => {
           onChange={setPriceFilter}
           options={[
             { value: 'all', label: 'All Prices' },
-            { value: 'under25', label: 'Under $25' },
-            { value: '25to50', label: '$25 - $50' },
-            { value: 'over50', label: 'Over $50' }
+            { value: 'under25', label: 'Under Rs.2500' },
+            { value: '25to50', label: 'Rs.2500 - Rs.5000' },
+            { value: 'over50', label: 'Over Rs.5000' }
           ]}
           label="Price Range"
         />
@@ -645,7 +645,7 @@ const StockManagement: React.FC = () => {
                   {cake.category}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ${cake.price.toFixed(2)}
+                  {formatCurrency(cake.price)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

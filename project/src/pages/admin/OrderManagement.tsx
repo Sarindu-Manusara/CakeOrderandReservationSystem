@@ -6,6 +6,7 @@ import SearchBar from '../../components/admin/SearchBar';
 import FilterDropdown from '../../components/admin/FilterDropdown';
 import ReportButton from '../../components/admin/ReportButton';
 import { formatReportData } from '../../../server/utils/reportGenerator';
+import { formatCurrency } from '../../../server/utils/FormatCurrency';
 
 interface Order {
   _id: string;
@@ -234,7 +235,7 @@ const OrderManagement: React.FC = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ${order.totalPrice.toFixed(2)}
+                  {formatCurrency(order.totalPrice)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <select

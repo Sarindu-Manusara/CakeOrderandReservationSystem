@@ -2,6 +2,7 @@ import axios from 'axios';
 import schedule from 'node-schedule';
 import Cake from '../models/cakeModel.js';
 
+
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY || 'e22b916173bb8dfbac2133cf97ac5de2';
 const COLOMBO_COORDS = { lat: 6.9271, lon: 79.8612 };
 
@@ -43,6 +44,9 @@ const adjustStockBasedOnWeather = async (weather) => {
     const cakes = await Cake.find({});
 
     for (const cake of cakes) {
+      if (cake.weatherSensitive == false) {
+        continue;
+      }
       let stockAdjustment = 0;
 
       // ☀️ Weather-based rules

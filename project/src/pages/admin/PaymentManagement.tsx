@@ -6,6 +6,7 @@ import SearchBar from '../../components/admin/SearchBar';
 import FilterDropdown from '../../components/admin/FilterDropdown';
 import ReportButton from '../../components/admin/ReportButton';
 import { formatReportData } from '../../../server/utils/reportGenerator';
+import {formatCurrency} from '../../../server/utils/FormatCurrency';
 
 interface Payment {
   _id: string;
@@ -261,7 +262,7 @@ const PaymentManagement: React.FC = () => {
                   <div className="text-sm text-gray-500">{payment.user.email}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ${payment.amount.toFixed(2)}
+                  {formatCurrency(payment.amount)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {payment.paymentMethod === 'credit_card' ? 'Credit Card' : 'Debit Card'}
