@@ -8,7 +8,7 @@ import { scheduleStockAdjustment } from './services/weatherStockService.js';
 
 // Routes
 import userRoutes from './routes/userRoutes.js';
-import cakeRoutes from './routes/cakeRoutes.js';
+import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import customCakeRoutes from './routes/customCakeRoutes.js';
@@ -31,7 +31,7 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/users', userRoutes);
-app.use('/api/cakes', cakeRoutes);
+app.use('/api/cakes', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/custom-cakes', customCakeRoutes);

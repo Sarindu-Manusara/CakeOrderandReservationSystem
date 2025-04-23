@@ -1,5 +1,5 @@
 import CartItem from '../models/cartModel.js';
-import Cake from '../models/cakeModel.js';
+import Cake from '../models/productModel.js';
 import CustomCake from '../models/customCakeModel.js';
 
 // @desc    Get user's cart items

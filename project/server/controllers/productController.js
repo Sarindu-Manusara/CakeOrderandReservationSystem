@@ -1,4 +1,4 @@
-import Cake from '../models/cakeModel.js';
+import Cake from '../models/productModel.js';
 
 // @desc    Get all cakes
 // @route   GET /api/cakes

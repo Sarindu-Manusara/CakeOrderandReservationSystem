@@ -1,6 +1,6 @@
 import axios from 'axios';
 import schedule from 'node-schedule';
-import Cake from '../models/cakeModel.js';
+import Cake from '../models/productModel.js';
 
 
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY || 'e22b916173bb8dfbac2133cf97ac5de2';

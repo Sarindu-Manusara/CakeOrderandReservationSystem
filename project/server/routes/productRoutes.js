@@ -7,7 +7,7 @@ import {
   deleteCake,
   createCakeReview,
   getFeaturedCakes
-} from '../controllers/cakeController.js';
+} from '../controllers/productController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();

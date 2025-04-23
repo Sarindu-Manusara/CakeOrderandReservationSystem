@@ -16,13 +16,18 @@ const reviewSchema = mongoose.Schema(
   }
 );
 
-const cakeSchema = mongoose.Schema(
+const productSchema = mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'User',
     },
+    productType: {
+      type: String,
+      enum: ['cake', 'cookie', 'sweet', 'bakery'],
+      required: true,
+    },        
     name: {
       type: String,
       required: true,
@@ -41,11 +46,15 @@ const cakeSchema = mongoose.Schema(
     },
     flavors: {
       type: [String],
-      required: true,
+      required: function () {
+        return this.productType === 'cake';
+      },
     },
     sizes: {
       type: [String],
-      required: true,
+      required: function () {
+        return this.productType === 'cake';
+      },
     },
     reviews: [reviewSchema],
     rating: {
@@ -95,6 +104,6 @@ const cakeSchema = mongoose.Schema(
   }
 );
 
-const Cake = mongoose.model('Cake', cakeSchema);
+const Product = mongoose.model('Product', productSchema);
 
-export default Cake;
+export default Product;
