@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import Hero from '../components/home/Hero';
-import FeaturedCakes from '../components/home/FeaturedCakes';
 import CustomCakeSection from '../components/home/CustomCakeSection';
 import Testimonials from '../components/home/Testimonials';
 import AdminSection from '../components/home/AdminSection';
-import { Cake } from '../types';
+import { Product } from '../types';
 import { AuthContext } from '../context/AuthContext';
+import FeaturedProducts from '../components/home/FeaturedProducts';
 
 // Temporary mock data until we connect to the backend
-const mockCakes: Cake[] = [
+const mockProducts: Product[] = [
   {
     _id: '1',
     name: 'Chocolate Fudge Dream',
@@ -26,7 +26,8 @@ const mockCakes: Cake[] = [
     stock: 0,
     weatherSensitive: false,
     minimumStock: 0,
-    maximumStock: 0
+    maximumStock: 0,
+    productType: 'cake'
   },
   {
     _id: '2',
@@ -44,7 +45,8 @@ const mockCakes: Cake[] = [
     stock: 0,
     weatherSensitive: false,
     minimumStock: 0,
-    maximumStock: 0
+    maximumStock: 0,
+    productType: 'cake'
   },
   {
     _id: '3',
@@ -62,23 +64,24 @@ const mockCakes: Cake[] = [
     stock: 0,
     weatherSensitive: false,
     minimumStock: 0,
-    maximumStock: 0
+    maximumStock: 0,
+    productType: 'cake'
   }
 ];
 
 const HomePage: React.FC = () => {
-  const [featuredCakes, setFeaturedCakes] = useState<Cake[]>(mockCakes);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>(mockProducts);
   const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
   
   useEffect(() => {
     // When backend is ready, uncomment this to fetch real data
     
-    const fetchFeaturedCakes = async () => {
+    const fetchFeaturedProducts = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get('/api/cakes/featured');
-        setFeaturedCakes(data);
+        const { data } = await axios.get('/api/products/featured');
+        setFeaturedProducts(data);
       } catch (error) {
         console.error('Error fetching featured cakes:', error);
       } finally {
@@ -86,14 +89,14 @@ const HomePage: React.FC = () => {
       }
     };
     
-    fetchFeaturedCakes();
+    fetchFeaturedProducts();
     
   }, []);
   
   return (
     <div>
       <Hero />
-      <FeaturedCakes cakes={featuredCakes} />
+      <FeaturedProducts products={featuredProducts} />
       <CustomCakeSection />
       <Testimonials />
       {user?.isAdmin && <AdminSection />}

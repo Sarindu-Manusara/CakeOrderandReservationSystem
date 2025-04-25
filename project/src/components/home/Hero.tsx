@@ -21,7 +21,7 @@ const Hero: React.FC = () => {
               transition={{ duration: 0.6 }}
               className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 text-white"
             >
-              Artisan Cakes for Every Celebration
+              Dedicated towards culinary excellence to create memorable food experiences
             </motion.h1>
             
             <motion.p
@@ -30,8 +30,7 @@ const Hero: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg md:text-xl text-primary-100 mb-8"
             >
-              Handcrafted with premium ingredients. Made fresh daily.
-              Perfect for birthdays, weddings, and special moments.
+              We channel our passion for food towards enriching and nourishing the lives enabling memorable food experiences.
             </motion.p>
             
             <motion.div
@@ -41,10 +40,10 @@ const Hero: React.FC = () => {
               className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4"
             >
               <Link to="/cakes" className="btn bg-primary-500 hover:bg-primary-600 text-accent-900 font-medium text-center">
-                Shop Cakes
+                Shop Products
               </Link>
               <Link to="/custom-cake" className="btn bg-transparent border-2 border-white hover:bg-white/10 text-white font-medium text-center">
-                Custom Order
+                Custom Cake Order
               </Link>
             </motion.div>
           </div>

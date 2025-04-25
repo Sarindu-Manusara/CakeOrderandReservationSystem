@@ -45,15 +45,15 @@ const Header: React.FC = () => {
           }`}>
             Home
           </Link>
-          <Link to="/cakes" className={`font-medium ${
+          <Link to="/products" className={`font-medium ${
             isScrolled ? 'text-accent-800 hover:text-secondary-700' : 'text-accent-800 hover:text-secondary-700'
           }`}>
-            Cakes
+            Products
           </Link>
           <Link to="/custom-cake" className={`font-medium ${
             isScrolled ? 'text-accent-800 hover:text-secondary-700' : 'text-accent-800 hover:text-secondary-700'
           }`}>
-            Custom Order
+            Custom Cake Order
           </Link>
           {isAuthenticated && user?.isAdmin && (
             <Link to="/admin" className={`font-medium ${
@@ -133,11 +133,11 @@ const Header: React.FC = () => {
           <Link to="/" className="py-2 font-medium text-accent-800">
             Home
           </Link>
-          <Link to="/cakes" className="py-2 font-medium text-accent-800">
-            Cakes
+          <Link to="/products" className="py-2 font-medium text-accent-800">
+            Products
           </Link>
           <Link to="/custom-cake" className="py-2 font-medium text-accent-800">
-            Custom Order
+            Custom Cake Order
           </Link>
           {isAuthenticated ? (
             <>

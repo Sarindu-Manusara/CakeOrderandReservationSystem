@@ -31,7 +31,7 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/users', userRoutes);
-app.use('/api/cakes', productRoutes);
+app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/custom-cakes', customCakeRoutes);

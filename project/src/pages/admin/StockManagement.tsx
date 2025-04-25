@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Edit2, Trash2, RefreshCw, CloudSun, Thermometer, Droplets, Clock } from 'lucide-react';
-import { Cake } from '../../types';
+import { Product } from '../../types';
 import SearchBar from '../../components/admin/SearchBar';
 import FilterDropdown from '../../components/admin/FilterDropdown';
 import ReportButton from '../../components/admin/ReportButton';
@@ -17,8 +17,8 @@ interface WeatherInfo {
 interface StockUpdate {
   timestamp: string;
   changes: Array<{
-    cakeId: string;
-    cakeName: string;
+    productId: string;
+    productName: string;
     oldStock: number;
     newStock: number;
     reason: string;
@@ -26,11 +26,11 @@ interface StockUpdate {
 }
 
 const StockManagement: React.FC = () => {
-  const [cakes, setCakes] = useState<Cake[]>([]);
+  const [products, setProducts] = useState<Product[]>([]); // renamed from cakes
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [editingCake, setEditingCake] = useState<Cake | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null); // renamed from editingCake
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [availabilityFilter, setAvailabilityFilter] = useState('all');
@@ -39,28 +39,30 @@ const StockManagement: React.FC = () => {
   const [stockUpdates, setStockUpdates] = useState<StockUpdate[]>([]);
   const [showUpdateHistory, setShowUpdateHistory] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: '',
-    image: '',
-    flavors: [] as string[],
-    sizes: [] as string[],
-    isAvailable: true,
-    featured: false,
-    weatherSensitive: false,
-    minimumStock: 5,
-    maximumStock: 50,
-    stock: 10
-  });
+const [formData, setFormData] = useState({
+  name: '',
+  description: '',
+  price: '',
+  category: '',
+  image: '',
+  productType: 'cake', // <-- add this field
+  flavors: [] as string[],
+  sizes: [] as string[],
+  isAvailable: true,
+  featured: false,
+  weatherSensitive: false,
+  minimumStock: 5,
+  maximumStock: 50,
+  stock: 10
+});
+
 
   useEffect(() => {
-    fetchCakes();
+    fetchProducts();
     fetchWeatherInfo();
     const interval = setInterval(() => {
       fetchWeatherInfo();
-      fetchCakes();
+      fetchProducts();
     }, 180000); // Check every 3 minutes
 
     return () => clearInterval(interval);
@@ -75,29 +77,28 @@ const StockManagement: React.FC = () => {
     }
   };
 
-  const fetchCakes = async () => {
+  const fetchProducts = async () => {
     try {
-      const { data } = await axios.get('/api/cakes', {
+      const { data } = await axios.get('/api/products', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      setCakes(data);
-
-      // Compare with previous stock levels and record changes
-      const previousCakes = cakes;
-      const changes = data.filter((newCake: Cake) => {
-        const oldCake = previousCakes.find(c => c._id === newCake._id);
-        return oldCake && oldCake.stock !== newCake.stock;
-      }).map((changedCake: Cake) => {
-        const oldCake = previousCakes.find(c => c._id === changedCake._id);
+      setProducts(data); // renamed from setCakes
+  
+      const previousProducts = products; // also renamed
+      const changes = data.filter((newProduct: Product) => {
+        const oldProduct = previousProducts.find(p => p._id === newProduct._id);
+        return oldProduct && oldProduct.stock !== newProduct.stock;
+      }).map((changedProduct: Product) => {
+        const oldProduct = previousProducts.find(p => p._id === changedProduct._id);
         return {
-          cakeId: changedCake._id,
-          cakeName: changedCake.name,
-          oldStock: oldCake?.stock || 0,
-          newStock: changedCake.stock,
-          reason: getStockChangeReason(changedCake, weatherInfo)
+          productId: changedProduct._id,
+          productName: changedProduct.name,
+          oldStock: oldProduct?.stock || 0,
+          newStock: changedProduct.stock,
+          reason: getStockChangeReason(changedProduct, weatherInfo)
         };
       });
-
+  
       if (changes.length > 0) {
         setStockUpdates(prev => [{
           timestamp: new Date().toISOString(),
@@ -105,23 +106,24 @@ const StockManagement: React.FC = () => {
         }, ...prev].slice(0, 10)); // Keep last 10 updates
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch cakes');
+      setError(err.response?.data?.message || 'Failed to fetch products');
     } finally {
       setLoading(false);
     }
   };
+  
 
-  const getStockChangeReason = (cake: Cake, weather: WeatherInfo | null): string => {
-    if (!weather || !cake.weatherSensitive) return 'Manual update';
+  const getStockChangeReason = (product: Product, weather: WeatherInfo | null): string => {
+    if (!weather || !product.weatherSensitive) return 'Manual update';
     
     const { temperature } = weather;
     if (temperature > 28) {
-      return cake.category.toLowerCase().includes('ice cream') 
+      return product.category.toLowerCase().includes('ice cream') 
         ? 'Increased due to hot weather'
         : 'Decreased due to hot weather';
     }
     if (temperature < 22) {
-      return cake.category.toLowerCase().includes('ice cream')
+      return product.category.toLowerCase().includes('ice cream')
         ? 'Decreased due to cold weather'
         : 'Increased due to cold weather';
     }
@@ -131,37 +133,41 @@ const StockManagement: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const cakeData = {
+      const productData = {
         ...formData,
         price: parseFloat(formData.price),
         weatherSensitive: Boolean(formData.weatherSensitive),
         minimumStock: parseInt(formData.minimumStock.toString()),
         maximumStock: parseInt(formData.maximumStock.toString()),
-        stock: parseInt(formData.stock.toString())
+        stock: parseInt(formData.stock.toString()),
       };
-
-      if (editingCake) {
+  
+      const endpoint = '/api/products'; // updated to generic endpoint
+  
+      if (editingProduct) {
         await axios.put(
-          `/api/cakes/${editingCake._id}`,
-          cakeData,
-          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }}
+          `${endpoint}/${editingProduct._id}`,
+          productData,
+          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
         );
       } else {
         await axios.post(
-          '/api/cakes',
-          cakeData,
-          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }}
+          endpoint,
+          productData,
+          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
         );
       }
-      fetchCakes();
+  
+      fetchProducts(); // should already be generic
       setShowForm(false);
-      setEditingCake(null);
+      setEditingProduct(null);
       setFormData({
         name: '',
         description: '',
         price: '',
         category: '',
         image: '',
+        productType: 'cake',
         flavors: [],
         sizes: [],
         isAvailable: true,
@@ -172,78 +178,83 @@ const StockManagement: React.FC = () => {
         stock: 10
       });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save cake');
+      setError(err.response?.data?.message || 'Failed to save product');
     }
   };
 
-  const handleEdit = (cake: Cake) => {
-    setEditingCake(cake);
-    setFormData({
-      name: cake.name,
-      description: cake.description,
-      price: cake.price.toString(),
-      category: cake.category,
-      image: cake.image,
-      flavors: cake.flavors,
-      sizes: cake.sizes,
-      isAvailable: cake.isAvailable,
-      featured: cake.featured || false,
-      weatherSensitive: cake.weatherSensitive || false,
-      minimumStock: cake.minimumStock || 5,
-      maximumStock: cake.maximumStock || 50,
-      stock: cake.stock || 10
-    });
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
     setShowForm(true);
+    setFormData({
+      name: product.name,
+      description: product.description,
+      price: product.price.toString(),
+      category: product.category,
+      image: product.image,
+      productType: product.productType,
+      flavors: product.flavors || [],
+      sizes: product.sizes || [],
+      isAvailable: product.isAvailable,
+      featured: product.featured,
+      weatherSensitive: product.weatherSensitive,
+      minimumStock: product.minimumStock,
+      maximumStock: product.maximumStock,
+      stock: product.stock
+    });
   };
+  
+  
+  
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this cake?')) return;
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      await axios.delete(`/api/cakes/${id}`, {
+      await axios.delete(`/api/products/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      fetchCakes();
+      fetchProducts();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to delete cake');
+      setError(err.response?.data?.message || 'Failed to delete product');
     }
   };
 
-  const filterCakes = (cakes: Cake[]) => {
-    return cakes.filter(cake => {
+  const filterProducts = (products: Product[]) => {
+    return products.filter(product => {
       const matchesSearch = 
-        cake.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cake.description.toLowerCase().includes(searchTerm.toLowerCase());
-
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase());
+  
       const matchesCategory = 
-        categoryFilter === 'all' || cake.category === categoryFilter;
-
+        categoryFilter === 'all' || product.category === categoryFilter;
+  
       const matchesAvailability =
         availabilityFilter === 'all' ||
-        (availabilityFilter === 'available' && cake.isAvailable) ||
-        (availabilityFilter === 'unavailable' && !cake.isAvailable);
-
-      const price = cake.price;
+        (availabilityFilter === 'available' && product.isAvailable) ||
+        (availabilityFilter === 'unavailable' && !product.isAvailable);
+  
+      const price = product.price;
       const matchesPrice =
         priceFilter === 'all' ||
         (priceFilter === 'under25' && price < 25) ||
         (priceFilter === '25to50' && price >= 25 && price <= 50) ||
         (priceFilter === 'over50' && price > 50);
-
+  
       return matchesSearch && matchesCategory && matchesAvailability && matchesPrice;
     });
   };
+  
 
-  const getWeatherImpactClass = (cake: Cake) => {
-    if (!cake.weatherSensitive || !weatherInfo) return '';
+  const getWeatherImpactClass = (product: Product) => {
+    if (!product.weatherSensitive || !weatherInfo) return '';
     
     const { temperature } = weatherInfo;
     if (temperature > 30) {
-      return cake.category.toLowerCase().includes('ice cream') ? 
+      return product.category.toLowerCase().includes('ice cream') ? 
         'bg-red-50 border-l-4 border-red-500' : '';
     }
     if (temperature < 22) {
-      return cake.category.toLowerCase().includes('ice cream') ? 
+      return product.category.toLowerCase().includes('ice cream') ? 
         'bg-blue-50 border-l-4 border-blue-500' : '';
     }
     return '';
@@ -255,15 +266,15 @@ const StockManagement: React.FC = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       alert(data.message);
-      fetchCakes(); // Refresh cake data after adjustment
+      fetchProducts(); // Refresh product data after adjustment
     } catch (err) {
       console.error('Manual adjustment failed:', err);
       alert('Stock adjustment failed.');
     }
   };
 
-  const filteredCakes = filterCakes(cakes);
-  const categories = Array.from(new Set(cakes.map(cake => cake.category)));
+  const filteredProducts = filterProducts(products);
+  const categories = Array.from(new Set(products.map(product => product.category)));
 
   if (loading) {
     return (
@@ -298,13 +309,13 @@ const StockManagement: React.FC = () => {
             </div>
           )}
           <ReportButton
-            data={filteredCakes}
+            data={filteredProducts}
             filename="products-report"
             formatData={formatReportData.products}
           />
           <button
             onClick={() => {
-              fetchCakes();
+              fetchProducts();
               fetchWeatherInfo();
             }}
             className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
@@ -325,7 +336,7 @@ const StockManagement: React.FC = () => {
             className="flex items-center px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600"
           >
             <Plus size={18} className="mr-2" />
-            Add New Cake
+            Add New Product
           </button>
         </div>
       </div>
@@ -354,7 +365,7 @@ const StockManagement: React.FC = () => {
                     </div>
                     {update.changes.map((change, changeIndex) => (
                       <div key={changeIndex} className="flex items-center justify-between text-sm">
-                        <span>{change.cakeName}</span>
+                        <span>{change.productName}</span>
                         <div className="flex items-center">
                           <span className="text-gray-500">{change.oldStock}</span>
                           <span className="mx-2">→</span>
@@ -383,7 +394,7 @@ const StockManagement: React.FC = () => {
         <SearchBar
           value={searchTerm}
           onChange={setSearchTerm}
-          placeholder="Search cakes..."
+          placeholder="Search products..."
         />
         
         <FilterDropdown
@@ -423,13 +434,11 @@ const StockManagement: React.FC = () => {
       {showForm && (
         <div className="mb-6 bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">
-            {editingCake ? 'Edit Cake' : 'Add New Cake'}
+            {editingProduct ? 'Edit Product' : 'Add New Product'}
           </h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
               <input
                 type="text"
                 required
@@ -438,10 +447,9 @@ const StockManagement: React.FC = () => {
                 className="w-full px-3 py-2 border rounded-md"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
               <input
                 type="text"
                 required
@@ -450,10 +458,24 @@ const StockManagement: React.FC = () => {
                 className="w-full px-3 py-2 border rounded-md"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Product Type</label>
+              <select
+                required
+                value={formData.productType}
+                onChange={(e) => setFormData({ ...formData, productType: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="cake">Cake</option>
+                <option value="cookie">Cookie</option>
+                <option value="sweet">Sweet</option>
+                <option value="bakery">Bakery</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
               <input
                 type="number"
                 required
@@ -462,10 +484,9 @@ const StockManagement: React.FC = () => {
                 className="w-full px-3 py-2 border rounded-md"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Image URL
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
               <input
                 type="url"
                 required
@@ -474,236 +495,230 @@ const StockManagement: React.FC = () => {
                 className="w-full px-3 py-2 border rounded-md"
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <textarea
-                required
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
-                rows={3}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Flavors (comma-separated)
-              </label>
-              <input
-                type="text"
-                value={formData.flavors.join(', ')}
-                onChange={(e) => setFormData({ ...formData, flavors: e.target.value.split(',').map(f => f.trim()) })}
-                className="w-full px-3 py-2 border rounded-md"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Sizes (comma-separated)
-              </label>
-              <input
-                type="text"
-                value={formData.sizes.join(', ')}
-                onChange={(e) => setFormData({ ...formData, sizes: e.target.value.split(',').map(s => s.trim()) })}
-                className="w-full px-3 py-2 border rounded-md"
-              />
-            </div>
-            <div className="flex items-center space-x-4">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.isAvailable}
-                  onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
-                  className="mr-2"
-                />
-                Available
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.featured}
-                  onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                  className="mr-2"
-                />
-                Featured
-              </label>
-            </div>
 
-            <div className="md:col-span-2">
-              <h3 className="font-medium text-gray-700 mb-2">Stock Management</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.weatherSensitive}
-                      onChange={(e) => setFormData({ ...formData, weatherSensitive: e.target.checked })}
-                      className="rounded text-primary-600"
-                    />
-                    <span>Weather Sensitive</span>
-                  </label>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Stock will be automatically adjusted based on weather conditions
-                  </p>
-                </div>
+  <div className="md:col-span-2">
+    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+    <textarea
+      required
+      value={formData.description}
+      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+      className="w-full px-3 py-2 border rounded-md"
+      rows={3}
+    />
+  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Minimum Stock
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.minimumStock}
-                    onChange={(e) => setFormData({ ...formData, minimumStock: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
-                </div>
+  {formData.productType === 'cake' && (
+    <>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Flavors (comma-separated)</label>
+        <input
+          type="text"
+          value={formData.flavors.join(', ')}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              flavors: e.target.value.split(',').map((f) => f.trim()),
+            })
+          }
+          className="w-full px-3 py-2 border rounded-md"
+        />
+      </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Maximum Stock
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.maximumStock}
-                    onChange={(e) => setFormData({ ...formData, maximumStock: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
-                </div>
-              </div>
-            </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Sizes (comma-separated)</label>
+        <input
+          type="text"
+          value={formData.sizes.join(', ')}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              sizes: e.target.value.split(',').map((s) => s.trim()),
+            })
+          }
+          className="w-full px-3 py-2 border rounded-md"
+        />
+      </div>
+    </>
+  )}
 
-            <div className="md:col-span-2 flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingCake(null);
-                }}
-                className="px-4 py-2 border rounded-md hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600"
-              >
-                {editingCake ? 'Update Cake' : 'Add Cake'}
-              </button>
-            </div>
-          </form>
+  <div className="flex items-center space-x-4 md:col-span-2">
+    <label className="flex items-center">
+      <input
+        type="checkbox"
+        checked={formData.isAvailable}
+        onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
+        className="mr-2"
+      />
+      Available
+    </label>
+    <label className="flex items-center">
+      <input
+        type="checkbox"
+        checked={formData.featured}
+        onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+        className="mr-2"
+      />
+      Featured
+    </label>
+  </div>
+
+  <div className="md:col-span-2">
+    <h3 className="font-medium text-gray-700 mb-2">Stock Management</h3>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={formData.weatherSensitive}
+            onChange={(e) => setFormData({ ...formData, weatherSensitive: e.target.checked })}
+            className="rounded text-primary-600"
+          />
+          <span>Weather Sensitive</span>
+        </label>
+        <p className="text-sm text-gray-500 mt-1">
+          Stock will be automatically adjusted based on weather conditions
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Stock</label>
+        <input
+          type="number"
+          min="0"
+          value={formData.minimumStock}
+          onChange={(e) =>
+            setFormData({ ...formData, minimumStock: parseInt(e.target.value) })
+          }
+          className="w-full px-3 py-2 border rounded-md"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Stock</label>
+        <input
+          type="number"
+          min="0"
+          value={formData.maximumStock}
+          onChange={(e) =>
+            setFormData({ ...formData, maximumStock: parseInt(e.target.value) })
+          }
+          className="w-full px-3 py-2 border rounded-md"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div className="md:col-span-2 flex justify-end space-x-4">
+    <button
+      type="button"
+      onClick={() => {
+        setShowForm(false);
+        setEditingProduct(null);
+      }}
+      className="px-4 py-2 border rounded-md hover:bg-gray-50"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      className="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600"
+    >
+      {editingProduct ? 'Update Product' : 'Add Product'}
+    </button>
+  </div>
+</form>
+
         </div>
       )}
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Image
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Price
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Stock
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Weather Sensitive
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredCakes.map((cake) => (
-              <tr key={cake._id} className={getWeatherImpactClass(cake)}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <img
-                    src={cake.image}
-                    alt={cake.name}
-                    className="h-12 w-12 rounded-full object-cover"
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{cake.name}</div>
-                  <div className="text-sm text-gray-500">{cake.description.substring(0, 50)}...</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {cake.category}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatCurrency(cake.price)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    cake.isAvailable
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {cake.isAvailable ? 'Available' : 'Out of Stock'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <span className={`font-medium ${
-                      cake.stock <= cake.minimumStock ? 'text-red-600' :
-                      cake.stock >= cake.maximumStock ? 'text-green-600' :
-                      'text-gray-900'
-                    }`}>
-                      {cake.stock}
-                    </span>
-                    {cake.weatherSensitive && weatherInfo && (
-                      <CloudSun 
-                        size={16} 
-                        className={`ml-2 ${
-                          weatherInfo.temperature > 30 ? 'text-red-500' :
-                          weatherInfo.temperature < 22 ? 'text-blue-500' :
-                          'text-primary-500'
-                        }`} 
-                      />
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    cake.weatherSensitive
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {cake.weatherSensitive ? 'Yes' : 'No'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => handleEdit(cake)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(cake._id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <table className="min-w-full">
+  <thead className="bg-gray-50">
+    <tr>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weather Sensitive</th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+    </tr>
+  </thead>
+  <tbody className="bg-white divide-y divide-gray-200">
+    {filteredProducts.map((product) => (
+      <tr key={product._id} className={getWeatherImpactClass(product)}>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="h-12 w-12 rounded-full object-cover"
+          />
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="text-sm font-medium text-gray-900">{product.name}</div>
+          <div className="text-sm text-gray-500">{product.description?.substring(0, 50)}...</div>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          {product.category}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          {formatCurrency(product.price)}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            product.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
+            {product.isAvailable ? 'Available' : 'Out of Stock'}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="flex items-center">
+            <span className={`font-medium ${
+              product.stock <= product.minimumStock ? 'text-red-600' :
+              product.stock >= product.maximumStock ? 'text-green-600' :
+              'text-gray-900'
+            }`}>
+              {product.stock}
+            </span>
+            {product.weatherSensitive && weatherInfo && (
+              <CloudSun 
+                size={16} 
+                className={`ml-2 ${
+                  weatherInfo.temperature > 30 ? 'text-red-500' :
+                  weatherInfo.temperature < 22 ? 'text-blue-500' :
+                  'text-primary-500'
+                }`} 
+              />
+            )}
+          </div>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className={`px-2 py-1 text-xs rounded-full ${
+            product.weatherSensitive ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+          }`}>
+            {product.weatherSensitive ? 'Yes' : 'No'}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+          <button
+            onClick={() => handleEdit(product)}
+            className="text-indigo-600 hover:text-indigo-900 mr-4"
+          >
+            <Edit2 size={18} />
+          </button>
+          <button
+            onClick={() => handleDelete(product._id)}
+            className="text-red-600 hover:text-red-900"
+          >
+            <Trash2 size={18} />
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
       </div>
     </div>
   );

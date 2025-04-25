@@ -65,7 +65,7 @@ const Testimonials: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-accent-600 max-w-2xl mx-auto"
           >
-            Don't just take our word for it. Here's what our customers have to say about our cakes and service.
+            Don't just take our word for it. Here's what our customers have to say about our products and service.
           </motion.p>
         </div>
 

@@ -4,7 +4,7 @@ import Footer from './components/layout/Footer';
 import AdminLayout from './components/layout/AdminLayout';
 import HomePage from './pages/HomePage';
 import CakesPage from './pages/CakesPage';
-import CakeDetailPage from './pages/CakeDetailPage';
+// import CakeDetailPage from './pages/CakeDetailPage';
 import CustomCakePage from './pages/CustomCakePage';
 import CartPage from './pages/CartPage';
 import PaymentPage from './pages/PaymentPage';
@@ -21,6 +21,8 @@ import UserManagement from './pages/admin/UserManagement';
 import CustomCakeManagement from './pages/admin/CustomCakeManagement';
 import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import ProductsPage from './pages/ProductsPage';
+import ProductDetailsPage from './pages/ProductDetailsPage';
 
 function App() {
   return (
@@ -50,7 +52,9 @@ function App() {
       <Routes>
         <Route index element={<HomePage />} />
         <Route path="cakes" element={<CakesPage />} />
-        <Route path="cakes/:id" element={<CakeDetailPage />} />
+        {/* <Route path="cakes/:id" element={<CakeDetailPage />} /> */}
+        <Route path="products/:id" element={<ProductDetailsPage />} />
+        <Route path="products" element={<ProductsPage />} />
         <Route path="custom-cake" element={<CustomCakePage />} />
         <Route path="cart" element={<CartPage />} />
         <Route path="login" element={<LoginPage />} />

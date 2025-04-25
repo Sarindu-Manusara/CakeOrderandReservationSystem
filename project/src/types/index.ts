@@ -1,5 +1,4 @@
-export interface Cake {
-  featured: boolean;
+export interface Product {
   _id: string;
   name: string;
   description: string;
@@ -7,14 +6,18 @@ export interface Cake {
   price: number;
   category: string;
   isAvailable: boolean;
-  flavors: string[];
-  sizes: string[];
+  stock: number;
+  featured: boolean;
   rating: number;
   reviews: Review[];
-  stock: number;
   weatherSensitive: boolean;
   minimumStock: number;
   maximumStock: number;
+  flavors: string[];
+  sizes: string[];
+
+  // NEW: Add this to distinguish product types
+  productType: 'cake' | 'cookie' | 'sweet' | 'bakery';
 }
 
 export interface Review {

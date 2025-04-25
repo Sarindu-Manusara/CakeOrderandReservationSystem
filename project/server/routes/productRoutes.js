@@ -1,24 +1,24 @@
 import express from 'express';
 import {
-  getCakes,
-  getCakeById,
-  createCake,
-  updateCake,
-  deleteCake,
-  createCakeReview,
-  getFeaturedCakes
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  createProductReview,
+  getFeaturedProducts
 } from '../controllers/productController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.route('/').get(getCakes).post(protect, admin, createCake);
-router.route('/featured').get(getFeaturedCakes);
-router.route('/:id/reviews').post(protect, createCakeReview);
+router.route('/').get(getProducts).post(protect, admin, createProduct);
+router.route('/featured').get(getFeaturedProducts);
+router.route('/:id/reviews').post(protect, createProductReview);
 router
   .route('/:id')
-  .get(getCakeById)
-  .put(protect, admin, updateCake)
-  .delete(protect, admin, deleteCake);
+  .get(getProductById)
+  .put(protect, admin, updateProduct)
+  .delete(protect, admin, deleteProduct);
 
 export default router;
