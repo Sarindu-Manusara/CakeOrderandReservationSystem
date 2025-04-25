@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { RefreshCw, Eye, RotateCcw, Download } from 'lucide-react';
+import { RefreshCw, Eye, RotateCcw, Download, Trash2 } from 'lucide-react';
 import SearchBar from '../../components/admin/SearchBar';
 import FilterDropdown from '../../components/admin/FilterDropdown';
 import ReportButton from '../../components/admin/ReportButton';
 import { formatReportData } from '../../../server/utils/reportGenerator';
 import {formatCurrency} from '../../../server/utils/FormatCurrency';
+
+
 
 interface Payment {
   _id: string;
@@ -34,6 +36,7 @@ const PaymentManagement: React.FC = () => {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [refundReason, setRefundReason] = useState('');
+
 
   // Search and Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -131,6 +134,29 @@ const PaymentManagement: React.FC = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const handleDelete = async (paymentId: string) => {
+    if (!window.confirm('Are you sure you want to delete this payment?')) return;
+  
+    try {
+      const token = localStorage.getItem('token');
+  
+      await axios.delete(`/api/payments/${paymentId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      alert('Payment deleted successfully!');
+      
+      fetchPayments();
+  
+    } catch (error: any) {
+      console.error('Error deleting payment:', error);
+      alert(error.response?.data?.message || 'Failed to delete payment');
+    }
+  };
+  
 
   const filteredPayments = filterPayments(payments);
 
@@ -276,23 +302,29 @@ const PaymentManagement: React.FC = () => {
                   {format(new Date(payment.createdAt), 'MMM dd, yyyy')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    onClick={() => {/* View details */}}
-                  >
-                    <Eye size={18} />
-                  </button>
-                  {payment.status === 'completed' && (
-                    <button
-                      className="text-red-600 hover:text-red-900"
-                      onClick={() => {
-                        setSelectedPayment(payment);
-                        setShowRefundModal(true);
-                      }}
-                    >
-                      <RotateCcw size={18} />
-                    </button>
-                  )}
+                 
+                  <div className="flex space-x-2">
+
+  {payment.status === 'completed' && (
+    <button
+      className="text-yellow-600 hover:text-yellow-800"
+      onClick={() => {
+        setSelectedPayment(payment);
+        setShowRefundModal(true);
+      }}
+    >
+      <RotateCcw size={18} />
+    </button>
+  )}
+
+  <button
+    className="text-red-600 hover:text-red-900"
+    onClick={() => handleDelete(payment._id)}
+  >
+    <Trash2 size={18} />
+  </button>
+</div>
+
                 </td>
               </tr>
             ))}
@@ -322,16 +354,13 @@ const PaymentManagement: React.FC = () => {
               />
             </div>
             <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => {
-                  setShowRefundModal(false);
-                  setSelectedPayment(null);
-                  setRefundReason('');
-                }}
-                className="px-4 py-2 border rounded-md hover:bg-gray-50"
-              >
-                Cancel
-              </button>
+                  <button
+                    onClick={() => handleDelete(selectedPayment._id)}
+
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    <Trash2 size={18} />
+                  </button>
               <button
                 onClick={() => handleRefund(selectedPayment)}
                 className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"

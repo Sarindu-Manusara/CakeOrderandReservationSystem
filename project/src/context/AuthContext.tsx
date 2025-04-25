@@ -1,10 +1,17 @@
-import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useContext,
+} from 'react';
 import axios from 'axios';
 
 interface User {
   _id: string;
   name: string;
   email: string;
+  phone: string;
   isAdmin: boolean;
 }
 
@@ -13,32 +20,26 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   login: (email: string, password: string, isAdminLogin?: boolean) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, phone: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
-export const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: false,
-  error: null,
-  login: async () => {},
-  register: async () => {},
-  logout: () => {},
-  isAuthenticated: false,
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
+
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -50,18 +51,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initAuth = async () => {
       const token = localStorage.getItem('token');
       const userStr = localStorage.getItem('user');
-      
+
       if (token && userStr) {
         try {
           const savedUser = JSON.parse(userStr);
           setUser(savedUser);
           setIsAuthenticated(true);
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          
+
           // Verify token validity
           await axios.get('/api/users/profile');
         } catch (err) {
-          // Token is invalid or expired
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           delete axios.defaults.headers.common['Authorization'];
@@ -78,8 +78,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string, isAdminLogin = false) => {
     try {
       const response = await axios.post('/api/users/login', { email, password });
-      
-      // For admin login, verify admin status
+
       if (isAdminLogin && !response.data.isAdmin) {
         throw new Error('Unauthorized: Admin access required');
       }
@@ -95,9 +94,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, phone: string, password: string) => {
     try {
-      const response = await axios.post('/api/users', { name, email, password });
+      const response = await axios.post('/api/users', { name, email, phone, password });
       const { token, ...userData } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -117,7 +116,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsAuthenticated(false);
   };
 
-  // Set up axios interceptor for handling 401 responses
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
       response => response,
@@ -135,18 +133,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      loading,
-      error,
-      login,
-      register,
-      logout,
-      isAuthenticated,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        error,
+        login,
+        register,
+        logout,
+        isAuthenticated,
+        setUser, // ✅ Make setUser accessible through context
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-export default AuthContext;
+export { AuthContext };
+

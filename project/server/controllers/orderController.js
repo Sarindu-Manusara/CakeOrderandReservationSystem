@@ -29,8 +29,7 @@ const addOrderItems = async (req, res) => {
       qty: item.qty,
       image: item.image,
       price: item.price,
-      cake: item.cake,
-      customCake: item.customCake,
+      product: item.product,
       isCustom: item.isCustom,
       customOptions: item.customOptions,
       reservationDate: item.reservationDate
@@ -45,7 +44,8 @@ const addOrderItems = async (req, res) => {
       taxPrice,
       shippingPrice,
       totalPrice,
-      isReservation
+      isReservation,
+      deliveryDate
     };
 
     // Add shipping address only for delivery orders
@@ -73,10 +73,7 @@ const addOrderItems = async (req, res) => {
 // @access  Private
 const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id).populate(
-      'user',
-      'name email'
-    );
+    const order = await Order.findById(req.params.id).populate('user', 'name email');
 
     if (order) {
       res.json(order);
@@ -193,29 +190,33 @@ const cancelOrder = async (req, res) => {
     const order = await Order.findById(req.params.id);
 
     if (!order) {
-      res.status(404).json({ message: 'Order not found' });
-      return;
+      return res.status(404).json({ message: 'Order not found' });
     }
 
     // Only allow cancellation if order is not delivered and not paid
     if (order.isDelivered || order.isPaid) {
-      res.status(400).json({ message: 'Cannot cancel order that is paid or delivered' });
-      return;
+      return res.status(400).json({ message: 'Cannot cancel order that is paid or delivered' });
     }
 
     // Verify user owns the order or is admin
     if (order.user.toString() !== req.user._id.toString() && !req.user.isAdmin) {
-      res.status(401).json({ message: 'Not authorized to cancel this order' });
-      return;
+      return res.status(401).json({ message: 'Not authorized to cancel this order' });
+    }
+
+    if (order.isCanceled) {
+      return res.status(400).json({ message: 'Order is already cancelled' });
     }
 
     order.status = 'Cancelled';
+    order.isCanceled = true;
+
     const updatedOrder = await order.save();
     res.json(updatedOrder);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 // @desc    Delete an order
 // @route   DELETE /api/orders/:id
@@ -228,7 +229,7 @@ const deleteOrder = async (req, res) => {
       return res.status(404).json({ message: 'Order not found' });
     }
 
-    await order.deleteOne(); // <-- FIXED: use deleteOne instead of remove
+    await order.deleteOne();
 
     res.json({ message: 'Order removed successfully' });
   } catch (error) {
@@ -236,7 +237,6 @@ const deleteOrder = async (req, res) => {
     res.status(500).json({ message: 'Server error while deleting order' });
   }
 };
-
 
 export {
   addOrderItems,

@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
               <h3 className="text-xl font-serif font-semibold text-white">Perera & Sons</h3>
             </div>
             <p className="text-primary-200 mb-4">
-              Creating delicious memories since 1975. Our cakes are made with the finest ingredients and crafted with love.
+            Founded in 1902, Perera & Sons is the largest food service restaurant chain in Sri Lanka serving a wide variety of cuisine. We make sure every item of food we produce has that extra bit of personal commitment and care.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-white hover:text-primary-300 transition-colors">
@@ -37,10 +37,10 @@ const Footer: React.FC = () => {
                 <Link to="/" className="text-primary-100 hover:text-primary-300 transition-colors">Home</Link>
               </li>
               <li>
-                <Link to="/cakes" className="text-primary-100 hover:text-primary-300 transition-colors">Cakes</Link>
+                <Link to="/cakes" className="text-primary-100 hover:text-primary-300 transition-colors">Products</Link>
               </li>
               <li>
-                <Link to="/custom-cake" className="text-primary-100 hover:text-primary-300 transition-colors">Custom Order</Link>
+                <Link to="/custom-cake" className="text-primary-100 hover:text-primary-300 transition-colors">Custom Cake Order</Link>
               </li>
               <li>
                 <Link to="/login" className="text-primary-100 hover:text-primary-300 transition-colors">My Account</Link>

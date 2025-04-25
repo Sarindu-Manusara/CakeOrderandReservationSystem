@@ -3,7 +3,8 @@ import {
   processPayment,
   getPaymentDetails,
   refundPayment,
-  getPayments
+  getPayments,
+  deletePayment // <-- Add this
 } from '../controllers/paymentController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
@@ -14,7 +15,8 @@ router.route('/')
   .get(protect, admin, getPayments);
 
 router.route('/:id')
-  .get(protect, getPaymentDetails);
+  .get(protect, getPaymentDetails)
+  .delete(protect, admin, deletePayment); 
 
 router.route('/:id/refund')
   .post(protect, admin, refundPayment);

@@ -4,11 +4,20 @@ import { useAuth } from './AuthContext';
 
 interface CartItem {
   _id: string;
-  name: string;
-  price: number;
-  image: string;
+  product?: {
+    _id: string;
+    name: string;
+    price: number;
+    image: string;
+  };
+  customCake?: {
+    _id: string;
+    size: string;
+    flavor: string;
+    price: number;
+  };
   quantity: number;
-  isCustom?: boolean;
+  isCustom: boolean;
   customOptions?: {
     size: string;
     flavor: string;
@@ -53,7 +62,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -66,7 +75,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     try {
       setLoading(true);
       const { data } = await axios.get('/api/cart', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setCartItems(data);
       calculateTotals(data);
@@ -77,10 +86,17 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   };
 
+  const getItemPrice = (item: CartItem): number => {
+    return item.product?.price ?? item.customCake?.price ?? 0;
+  };
+
   const calculateTotals = (items: CartItem[]) => {
     const itemCount = items.reduce((total, item) => total + item.quantity, 0);
-    const priceTotal = items.reduce((total, item) => total + (item.price * item.quantity), 0);
-    
+    const priceTotal = items.reduce(
+      (total, item) => total + getItemPrice(item) * item.quantity,
+      0
+    );
+
     setTotalItems(itemCount);
     setTotalPrice(priceTotal);
   };
@@ -90,20 +106,40 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await axios.post('/api/cart', {
-        cakeId: item._id,
-        quantity: item.quantity,
-        price: item.price,
-        isCustom: item.isCustom || false,
-        customOptions: item.customOptions,
-        reservationDate: item.reservationDate
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      let payload;
+
+      if (item.isCustom) {
+        if (!item.customCake?._id) {
+          throw new Error('Custom cake ID is missing.');
+        }
+
+        payload = {
+          customCakeId: item.customCake._id,
+          quantity: item.quantity,
+          isCustom: true,
+          customOptions: item.customOptions,
+          reservationDate: item.reservationDate,
+        };
+      } else {
+        if (!item.product?._id) {
+          throw new Error('Product ID is missing.');
+        }
+
+        payload = {
+          productId: item.product._id,
+          quantity: item.quantity,
+          isCustom: false,
+          reservationDate: item.reservationDate,
+        };
+      }
+
+      await axios.post('/api/cart', payload, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
 
       await fetchCartItems();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to add item to cart');
+      setError(err.response?.data?.message || err.message || 'Failed to add item to cart');
       throw err;
     } finally {
       setLoading(false);
@@ -116,7 +152,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setError(null);
 
       await axios.delete(`/api/cart/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
 
       await fetchCartItems();
@@ -133,9 +169,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      await axios.put(`/api/cart/${id}`, 
+      await axios.put(
+        `/api/cart/${id}`,
         { quantity },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }}
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        }
       );
 
       await fetchCartItems();
@@ -153,7 +192,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setError(null);
 
       await axios.delete('/api/cart', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
 
       setCartItems([]);
@@ -167,17 +206,19 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   return (
-    <CartContext.Provider value={{
-      cartItems,
-      addToCart,
-      removeFromCart,
-      updateQuantity,
-      clearCart,
-      totalItems,
-      totalPrice,
-      loading,
-      error,
-    }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        totalItems,
+        totalPrice,
+        loading,
+        error,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

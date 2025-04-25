@@ -1,13 +1,14 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ShoppingBag, User, Menu, X, Cake } from 'lucide-react';
-import AuthContext from '../../context/AuthContext';
+import {AuthContext, useAuth} from '../../context/AuthContext';
 import CartContext from '../../context/CartContext';
+import logo from '../../../resources/images/logo.png';
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isAuthenticated, user, logout } = useContext(AuthContext);
+  const { isAuthenticated, user, logout } = useAuth();
   const { totalItems } = useContext(CartContext);
   const location = useLocation();
 
@@ -30,7 +31,8 @@ const Header: React.FC = () => {
     }`}>
       <div className="container-custom flex justify-between items-center">
         <Link to="/" className="flex items-center">
-          <Cake className={`mr-2 ${isScrolled ? 'text-secondary-800' : 'text-secondary-800'}`} size={32} />
+          <img src={logo} alt="" style={{ width: '50px', height: 'auto' }}/>
+          {/* <Cake className={`mr-2 ${isScrolled ? 'text-secondary-800' : 'text-secondary-800'}`} size={32} /> */}
           <span className={`font-serif text-xl md:text-2xl font-bold ${
             isScrolled ? 'text-secondary-800' : 'text-secondary-800'
           }`}>

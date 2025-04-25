@@ -5,22 +5,17 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { formatCurrency } from '../../server/utils/FormatCurrency';
 
-interface CartItem {
+type CartItem = {
   _id: string;
-  cake?: {
-    _id: string;
-    name: string;
-    price: number;
-    image: string;
-  };
-  customCake?: {
+  quantity: number;
+  isCustom: true;
+  customCake: {
     _id: string;
     size: string;
     flavor: string;
     price: number;
   };
-  quantity: number;
-  isCustom: boolean;
+  product?: undefined;
   customOptions?: {
     size: string;
     flavor: string;
@@ -29,7 +24,21 @@ interface CartItem {
     message: string;
   };
   reservationDate?: string;
-}
+} | {
+  _id: string;
+  quantity: number;
+  isCustom: false;
+  product: {
+    _id: string;
+    name: string;
+    price: number;
+    image: string;
+  };
+  customCake?: undefined;
+  customOptions?: undefined;
+  reservationDate?: string;
+};
+
 
 interface DeliveryDetails {
   address: string;
@@ -97,25 +106,25 @@ const CartPage: React.FC = () => {
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
-      const price = item.isCustom ? item.customCake?.price : item.cake?.price;
+      const price = item.isCustom ? item.customCake?.price : item.product?.price;
       return total + (price || 0) * item.quantity;
     }, 0);
   };
 
   const formatOrderItems = (items: CartItem[]) => {
     return items.map(item => ({
-      name: item.isCustom ? `Custom ${item.customCake?.flavor} Cake` : item.cake?.name,
+      name: item.isCustom ? `Custom ${item.customCake?.flavor} Cake` : item.product?.name,
       qty: item.quantity,
-      image: item.isCustom ? 'https://images.pexels.com/photos/6208089/pexels-photo-6208089.jpeg' : item.cake?.image,
-      price: item.isCustom ? item.customCake?.price : item.cake?.price,
-      cake: item.cake?._id,
+      image: item.isCustom ? 'https://images.pexels.com/photos/6208089/pexels-photo-6208089.jpeg' : item.product?.image,
+      price: item.isCustom ? item.customCake?.price : item.product?.price,
+      product: item.product?._id,
       customCake: item.customCake?._id,
       isCustom: item.isCustom,
       customOptions: item.customOptions,
       reservationDate: item.reservationDate
     }));
   };
-
+  
   const handleDeliverySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -178,7 +187,7 @@ const CartPage: React.FC = () => {
           <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
           <p className="text-gray-600 mb-6">Looks like you haven't added any cakes to your cart yet.</p>
           <Link 
-            to="/cakes" 
+            to="/products" 
             className="bg-primary-500 text-white px-6 py-3 rounded-md font-medium hover:bg-primary-600 transition-colors"
           >
             Browse Cakes
@@ -205,13 +214,13 @@ const CartPage: React.FC = () => {
               <div key={item._id} className="p-6 border-b">
                 <div className="flex items-center">
                   <img 
-                    src={item.isCustom ? 'https://images.pexels.com/photos/6208089/pexels-photo-6208089.jpeg' : item.cake?.image}
-                    alt={item.isCustom ? 'Custom Cake' : item.cake?.name}
+                    src={item.isCustom ? 'https://images.pexels.com/photos/6208089/pexels-photo-6208089.jpeg' : item.product?.image}
+                    alt={item.isCustom ? 'Custom Cake' : item.product?.name}
                     className="w-24 h-24 object-cover rounded-lg"
                   />
                   <div className="ml-6 flex-1">
                     <h3 className="text-lg font-semibold">
-                      {item.isCustom ? `Custom ${item.customCake?.flavor} Cake` : item.cake?.name}
+                      {item.isCustom ? `Custom ${item.customCake?.flavor} Cake` : item.product?.name}
                     </h3>
                     {item.isCustom && item.customOptions && (
                       <div className="text-sm text-gray-600 mt-1">
@@ -244,7 +253,7 @@ const CartPage: React.FC = () => {
                       </button>
                     </div>
                     <span className="font-semibold">
-                      {formatCurrency((item.isCustom ? item.customCake?.price : item.cake?.price) || 0)}
+                      {formatCurrency((item.isCustom ? item.customCake?.price : item.product?.price) || 0)}
                     </span>
                     <button 
                       onClick={() => removeItem(item._id)}

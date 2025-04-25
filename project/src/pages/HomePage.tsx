@@ -5,7 +5,7 @@ import CustomCakeSection from '../components/home/CustomCakeSection';
 import Testimonials from '../components/home/Testimonials';
 import AdminSection from '../components/home/AdminSection';
 import { Product } from '../types';
-import { AuthContext } from '../context/AuthContext';
+import {AuthContext, useAuth} from '../context/AuthContext';
 import FeaturedProducts from '../components/home/FeaturedProducts';
 
 // Temporary mock data until we connect to the backend
@@ -72,7 +72,8 @@ const mockProducts: Product[] = [
 const HomePage: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>(mockProducts);
   const [loading, setLoading] = useState(false);
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth(); 
+
   
   useEffect(() => {
     // When backend is ready, uncomment this to fetch real data

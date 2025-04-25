@@ -1,5 +1,5 @@
 import CartItem from '../models/cartModel.js';
-import Cake from '../models/productModel.js';
+import Product from '../models/productModel.js';
 import CustomCake from '../models/customCakeModel.js';
 
 // @desc    Get user's cart items
@@ -8,7 +8,7 @@ import CustomCake from '../models/customCakeModel.js';
 const getCartItems = async (req, res) => {
   try {
     const cartItems = await CartItem.find({ user: req.user._id })
-      .populate('cake', 'name price image')
+      .populate('product', 'name price image productType')
       .populate('customCake', 'flavor size price');
     res.json(cartItems);
   } catch (error) {
@@ -22,7 +22,7 @@ const getCartItems = async (req, res) => {
 const addToCart = async (req, res) => {
   try {
     const {
-      cakeId,
+      productId,
       customCakeId,
       quantity,
       isCustom,
@@ -31,29 +31,28 @@ const addToCart = async (req, res) => {
       price
     } = req.body;
 
-    let itemPrice = price;
+    let itemPrice;
 
-    if (!isCustom && cakeId) {
-      const cake = await Cake.findById(cakeId);
-      if (!cake) {
-        return res.status(404).json({ message: 'Cake not found' });
-      }
-      itemPrice = cake.price;
-    } else if (isCustom && customCakeId) {
-      const customCake = await CustomCake.findById(customCakeId);
-      if (!customCake) {
-        return res.status(404).json({ message: 'Custom cake not found' });
-      }
-      itemPrice = customCake.price;
-    }
+if (!isCustom && productId) {
+  const product = await Product.findById(productId);
+  if (!product) {
+    return res.status(404).json({ message: 'Product not found' });
+  }
+  itemPrice = product.price;
+} else if (isCustom && customCakeId) {
+  const customCake = await CustomCake.findById(customCakeId);
+  if (!customCake) {
+    return res.status(404).json({ message: 'Custom cake not found' });
+  }
+  itemPrice = customCake.price;
+} else {
+  return res.status(400).json({ message: 'Invalid item information' });
+}
 
-    if (!itemPrice) {
-      return res.status(400).json({ message: 'Price is required' });
-    }
 
     const cartItem = new CartItem({
       user: req.user._id,
-      cake: !isCustom ? cakeId : undefined,
+      product: !isCustom ? productId : undefined,
       customCake: isCustom ? customCakeId : undefined,
       quantity,
       isCustom,

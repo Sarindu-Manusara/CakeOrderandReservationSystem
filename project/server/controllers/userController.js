@@ -12,6 +12,7 @@ const authUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         isAdmin: user.isAdmin,
         token: generateToken(user._id),
       });
@@ -26,7 +27,7 @@ const authUser = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, phone, password } = req.body;
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -37,6 +38,7 @@ const registerUser = async (req, res) => {
     const user = await User.create({
       name,
       email,
+      phone,
       password,
     });
 
@@ -45,6 +47,7 @@ const registerUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         isAdmin: user.isAdmin,
         token: generateToken(user._id),
       });
@@ -65,6 +68,7 @@ const getUserProfile = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         isAdmin: user.isAdmin,
       });
     } else {
@@ -83,6 +87,7 @@ const updateUserProfile = async (req, res) => {
     if (user) {
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
+      user.phone = req.body.phone || user.phone;
       
       if (req.body.password) {
         user.password = req.body.password;
@@ -94,6 +99,7 @@ const updateUserProfile = async (req, res) => {
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
+        phone: updatedUser.phone,
         isAdmin: updatedUser.isAdmin,
         token: generateToken(updatedUser._id),
       });
@@ -151,6 +157,7 @@ const updateUser = async (req, res) => {
     if (user) {
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
+      user.phone = req.body.phone || user.phone;
       user.isAdmin = req.body.isAdmin !== undefined ? req.body.isAdmin : user.isAdmin;
 
       const updatedUser = await user.save();
@@ -159,6 +166,7 @@ const updateUser = async (req, res) => {
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
+        phone: updatedUser.phone,
         isAdmin: updatedUser.isAdmin,
       });
     } else {

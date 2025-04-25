@@ -16,20 +16,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
+  
     if (!product.isAvailable || product.stock <= 0) {
       alert('This product is currently out of stock');
       return;
     }
-
+  
     addToCart({
-      _id: product._id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity: 1
+      _id: '', // temporary, server will generate real one
+      product: {
+        _id: product._id,
+        name: product.name,
+        price: product.price,
+        image: product.image
+      },
+      quantity: 1,
+      isCustom: false
     });
   };
+  
 
   return (
     <div className="card group h-full flex flex-col">

@@ -20,6 +20,9 @@ export interface Product {
   productType: 'cake' | 'cookie' | 'sweet' | 'bakery';
 }
 
+
+
+
 export interface Review {
   _id: string;
   user: {
@@ -40,14 +43,30 @@ export interface User {
 
 export interface CartItem {
   _id: string;
-  name: string;
-  price: number;
-  image: string;
+  product?: {
+    _id: string;
+    name: string;
+    price: number;
+    image: string;
+  };
+  customCake?: {
+    _id: string;
+    size: string;
+    flavor: string;
+    price: number;
+  };
   quantity: number;
-  isCustom?: boolean;
-  customOptions?: CustomCakeOptions;
+  isCustom: boolean;
+  customOptions?: {
+    size: string;
+    flavor: string;
+    frosting: string;
+    decorations: string[];
+    message: string;
+  };
   reservationDate?: string;
 }
+
 
 export interface CustomCakeOptions {
   size: string;
@@ -85,6 +104,7 @@ export interface Order {
   isPaid: boolean;
   paidAt?: string;
   isDelivered: boolean;
+  isCancelled: boolean;
   deliveredAt?: string;
   createdAt: string;
 }

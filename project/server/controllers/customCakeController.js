@@ -111,11 +111,58 @@ const deleteCustomCake = async (req, res) => {
   }
 };
 
+// @desc    Update a custom cake
+// @route   PUT /api/custom-cakes/:id
+// @access  Private
+const updateCustomCake = async (req, res) => {
+  try {
+    const customCake = await CustomCake.findById(req.params.id);
+
+    if (!customCake) {
+      return res.status(404).json({ message: 'Custom Cake not found' });
+    }
+
+    // Optional: Check if the logged-in user is the owner or admin
+    if (String(customCake.user) !== String(req.user._id) && !req.user.isAdmin) {
+      return res.status(403).json({ message: 'Not authorized to update this cake' });
+    }
+
+    const {
+      size,
+      flavor,
+      frosting,
+      decorations,
+      message,
+      specialRequests,
+      price,
+      reservationDate
+    } = req.body;
+
+    // Update fields if provided
+    if (size !== undefined) customCake.size = size;
+    if (flavor !== undefined) customCake.flavor = flavor;
+    if (frosting !== undefined) customCake.frosting = frosting;
+    if (decorations !== undefined) customCake.decorations = decorations;
+    if (message !== undefined) customCake.message = message;
+    if (specialRequests !== undefined) customCake.specialRequests = specialRequests;
+    if (price !== undefined) customCake.price = price;
+    if (reservationDate !== undefined) customCake.reservationDate = reservationDate;
+
+    const updatedCake = await customCake.save();
+    res.json(updatedCake);
+  } catch (error) {
+    console.error('❌ Error updating Custom Cake:', error);
+    res.status(500).json({ message: 'Server error while updating Custom Cake' });
+  }
+};
+
+
 
 
 export {
   createCustomCake,
   getCustomCakes,
   getAllCustomCakes,
-  deleteCustomCake
+  deleteCustomCake,
+  updateCustomCake
 };

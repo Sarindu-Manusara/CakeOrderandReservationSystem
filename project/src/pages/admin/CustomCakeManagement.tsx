@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { RefreshCw, Eye, Trash2 } from 'lucide-react';
+import { RefreshCw, Eye, Trash2, Edit2 } from 'lucide-react';
 import SearchBar from '../../components/admin/SearchBar';
 import FilterDropdown from '../../components/admin/FilterDropdown';
 import ReportButton from '../../components/admin/ReportButton';
@@ -31,6 +31,9 @@ const CustomCakeManagement: React.FC = () => {
   const [error, setError] = useState('');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedCake, setSelectedCake] = useState<CustomCake | null>(null);
+  const [editingCakeId, setEditingCakeId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<CustomCake>>({});
+
 
   // Search and Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -68,6 +71,32 @@ const CustomCakeManagement: React.FC = () => {
       setError(err.response?.data?.message || 'Failed to delete custom cake');
     }
   };
+
+  const handleEdit = async (customCakeId: string, updatedData: Partial<CustomCake>) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Authentication token missing');
+  
+      const { data } = await axios.put(
+        `/api/custom-cakes/${customCakeId}`,
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      alert('Custom cake updated successfully!');
+      // Optional: Refresh data or update local state
+      fetchCustomCakes?.(); // call your data refetch function if you have one
+    } catch (error: any) {
+      console.error('Error updating custom cake:', error);
+      alert(error.response?.data?.message || 'Failed to update custom cake');
+    }
+  };
+  
 
   const filterCustomCakes = (cakes: CustomCake[]) => {
     return cakes.filter(cake => {
@@ -114,6 +143,8 @@ const CustomCakeManagement: React.FC = () => {
   }
 
   return (
+
+    
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Custom Cake Management</h1>
@@ -205,7 +236,7 @@ const CustomCakeManagement: React.FC = () => {
                 Price
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Reservation
+                Reservation Date
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Created
@@ -216,55 +247,142 @@ const CustomCakeManagement: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredCakes.map((cake) => (
-              <tr key={cake._id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{cake.user.name}</div>
-                  <div className="text-sm text-gray-500">{cake.user.email}</div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900">
-                    {cake.size} {cake.flavor} Cake
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {cake.frosting} frosting
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatCurrency(cake.price)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {cake.reservationDate ? (
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                      {format(new Date(cake.reservationDate), 'MMM dd, yyyy')}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-gray-500">No reservation</span>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {format(new Date(cake.createdAt), 'MMM dd, yyyy')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    onClick={() => {
-                      setSelectedCake(cake);
-                      setShowDetailsModal(true);
-                    }}
-                  >
-                    <Eye size={18} />
-                  </button>
-                  <button
-                    className="text-red-600 hover:text-red-900"
-                    onClick={() => handleDelete(cake._id)}
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+  {filteredCakes.map((cake) => (
+    <tr key={cake._id}>
+      {editingCakeId === cake._id ? (
+        <>
+          <td className="px-6 py-4 whitespace-nowrap">
+            <div className="text-sm text-gray-900">{cake.user.name}</div>
+            <div className="text-sm text-gray-500">{cake.user.email}</div>
+          </td>
+          <td className="px-6 py-4">
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={editForm.size}
+                onChange={(e) => setEditForm({ ...editForm, size: e.target.value })}
+                className="w-full border rounded px-2 py-1 text-sm"
+                placeholder="Size"
+              />
+              <input
+                type="text"
+                value={editForm.flavor}
+                onChange={(e) => setEditForm({ ...editForm, flavor: e.target.value })}
+                className="w-full border rounded px-2 py-1 text-sm"
+                placeholder="Flavor"
+              />
+              <input
+                type="text"
+                value={editForm.frosting}
+                onChange={(e) => setEditForm({ ...editForm, frosting: e.target.value })}
+                className="w-full border rounded px-2 py-1 text-sm"
+                placeholder="Frosting"
+              />
+            </div>
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            <input
+              type="number"
+              value={editForm.price}
+              onChange={(e) => setEditForm({ ...editForm, price: parseFloat(e.target.value) })}
+              className="w-full border rounded px-2 py-1 text-sm"
+              placeholder="Price"
+            />
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap">
+            <input
+              type="date"
+              value={editForm.reservationDate ? editForm.reservationDate.split("T")[0] : ''}
+              onChange={(e) => setEditForm({ ...editForm, reservationDate: e.target.value })}
+              className="w-full border rounded px-2 py-1 text-sm"
+            />
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {format(new Date(cake.createdAt), 'MMM dd, yyyy')}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
+            <button
+              onClick={() => {
+                handleEdit(cake._id, editForm);
+                setEditingCakeId(null);
+              }}
+              className="text-green-600 hover:text-green-800"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => {
+                setEditingCakeId(null);
+                setEditForm({});
+              }}
+              className="text-gray-600 hover:text-gray-800"
+            >
+              Cancel
+            </button>
+          </td>
+        </>
+      ) : (
+        <>
+          <td className="px-6 py-4 whitespace-nowrap">
+            <div className="text-sm text-gray-900">{cake.user.name}</div>
+            <div className="text-sm text-gray-500">{cake.user.email}</div>
+          </td>
+          <td className="px-6 py-4">
+            <div className="text-sm text-gray-900">
+              {cake.size} {cake.flavor} Cake
+            </div>
+            <div className="text-sm text-gray-500">
+              {cake.frosting} frosting
+            </div>
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {formatCurrency(cake.price)}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap">
+            {cake.reservationDate ? (
+              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                {format(new Date(cake.reservationDate), 'MMM dd, yyyy')}
+              </span>
+            ) : (
+              <span className="text-sm text-gray-500">No reservation</span>
+            )}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {format(new Date(cake.createdAt), 'MMM dd, yyyy')}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setEditingCakeId(cake._id);
+                setEditForm({
+                  size: cake.size,
+                  flavor: cake.flavor,
+                  frosting: cake.frosting,
+                  decorations: cake.decorations,
+                  message: cake.message,
+                  specialRequests: cake.specialRequests,
+                  reservationDate: cake.reservationDate,
+                  price: cake.price,
+                });
+              }}
+              className="flex items-center text-indigo-600 hover:text-indigo-900"
+            >
+              <Edit2 size={18} className="mr-1" />
+            </button>
+            <button
+              className="text-red-600 hover:text-red-900"
+              onClick={() => handleDelete(cake._id)}
+            >
+              <Trash2 size={18} />
+            </button>
+          </td>
+        </>
+      )}
+    </tr>
+  ))}
+</tbody>
+
         </table>
       </div>
 

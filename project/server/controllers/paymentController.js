@@ -140,9 +140,38 @@ const getPayments = async (req, res) => {
   }
 };
 
+// @desc    Delete a payment
+// @route   DELETE /api/payments/:id
+// @access  Private/Admin
+const deletePayment = async (req, res) => {
+  try {
+    const payment = await Payment.findById(req.params.id);
+
+    if (!payment) {
+      return res.status(404).json({ message: 'Payment not found' });
+    }
+
+    // Also roll back order status if payment was completed
+    const order = await Order.findById(payment.order);
+    if (order && payment.status === 'completed') {
+      order.isPaid = false;
+      order.paymentResult = {};
+      await order.save();
+    }
+
+    await payment.deleteOne();
+
+    res.json({ message: 'Payment deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 export {
   processPayment,
   getPaymentDetails,
   refundPayment,
-  getPayments
+  getPayments,
+  deletePayment
 };

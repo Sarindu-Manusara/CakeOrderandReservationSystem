@@ -1,14 +1,14 @@
 import mongoose from 'mongoose';
 
-const cartItemSchema = mongoose.Schema({
+const cartItemSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User',
   },
-  cake: {
+  product: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Cake',
+    ref: 'Product', // now supports all product types (cake, sweet, cookie, etc.)
   },
   customCake: {
     type: mongoose.Schema.Types.ObjectId,

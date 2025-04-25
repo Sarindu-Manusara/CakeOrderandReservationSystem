@@ -22,9 +22,9 @@ const orderSchema = mongoose.Schema(
           message: { type: String },
         },
         reservationDate: { type: Date },
-        cake: {
+        product: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: 'Cake',
+          ref: 'Product', // replaces old 'cake' field
         },
         customCake: {
           type: mongoose.Schema.Types.ObjectId,
@@ -33,21 +33,29 @@ const orderSchema = mongoose.Schema(
       },
     ],
     shippingAddress: {
-      address: { 
+      address: {
         type: String,
-        required: function() { return !this.isReservation; }
+        required: function () {
+          return !this.isReservation;
+        },
       },
-      city: { 
+      city: {
         type: String,
-        required: function() { return !this.isReservation; }
+        required: function () {
+          return !this.isReservation;
+        },
       },
-      postalCode: { 
+      postalCode: {
         type: String,
-        required: function() { return !this.isReservation; }
+        required: function () {
+          return !this.isReservation;
+        },
       },
-      country: { 
+      country: {
         type: String,
-        required: function() { return !this.isReservation; }
+        required: function () {
+          return !this.isReservation;
+        },
       },
     },
     paymentMethod: {
@@ -93,6 +101,13 @@ const orderSchema = mongoose.Schema(
       required: true,
       default: false,
     },
+    
+    isCanceled: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    
     deliveredAt: {
       type: Date,
     },
