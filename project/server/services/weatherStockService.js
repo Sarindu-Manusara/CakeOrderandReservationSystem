@@ -6,17 +6,15 @@ import path from 'path';
 import nodemailer from 'nodemailer';
 import User from '../models/userModel.js';
 
+// Constants
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY || 'e22b916173bb8dfbac2133cf97ac5de2';
 const COLOMBO_COORDS = { lat: 6.9271, lon: 79.8612 };
 const LOG_FILE_PATH = path.join('logs', 'price_stock_changes.log');
 
+// Utility Functions
 const isHoliday = (date) => {
   const holidays = [
-    '2025-01-01', // New Year's Day
-    '2025-01-15', // Tamil Thai Pongal Day
-    '2025-02-04', // National Day
-    '2025-05-01', // May Day
-    '2025-12-25', // Christmas
+    '2025-01-01', '2025-01-15', '2025-02-04', '2025-05-01', '2025-12-25'
   ];
   const dateString = date.toISOString().split('T')[0];
   return holidays.includes(dateString);
@@ -29,7 +27,7 @@ const getWeatherData = async () => {
     );
     return response.data;
   } catch (error) {
-    console.error('Error fetching weather data:', error);
+    console.error('❌ Error fetching weather data:', error.message);
     return null;
   }
 };
@@ -47,7 +45,6 @@ const adjustStockBasedOnWeather = async (weather) => {
   const holiday = isHoliday(now);
   const summer = now.getMonth() >= 3 && now.getMonth() <= 8;
 
-  /** @type {string[]} */
   const changeLogs = [];
 
   try {
@@ -59,21 +56,19 @@ const adjustStockBasedOnWeather = async (weather) => {
       let stockAdjustment = 0;
       let priceAdjustment = 0;
 
-      // Weather-based stock + price
+      // Weather-based adjustments
       if (isHot) {
         if (product.category.toLowerCase().includes('ice cream')) {
           stockAdjustment += 5;
           priceAdjustment -= 500;
         } else if (product.category.toLowerCase().includes('chocolate')) {
           stockAdjustment -= 2;
+          priceAdjustment -= 500;
         }
       }
 
       if (isRaining) {
-        if (
-          product.category.toLowerCase().includes('chocolate') ||
-          product.category.toLowerCase().includes('carrot')
-        ) {
+        if (['chocolate', 'carrot'].some(keyword => product.category.toLowerCase().includes(keyword))) {
           stockAdjustment += 3;
         }
       }
@@ -96,56 +91,66 @@ const adjustStockBasedOnWeather = async (weather) => {
         stockAdjustment += 2;
       }
 
-      // Final values
+      // Apply adjustments with bounds
       const minStock = 5;
       const maxStock = 50;
       const newStock = Math.max(minStock, Math.min(maxStock, product.stock + stockAdjustment));
       const newPrice = Math.max(0, product.price + priceAdjustment);
 
-      // Update DB
       await Product.findByIdAndUpdate(product._id, {
         stock: newStock,
         price: newPrice,
       });
 
-      // Save change log
       const logEntry = `${new Date().toISOString()} | ${product.name} | Stock: ${product.stock} → ${newStock} | Price: ${product.price} → ${newPrice}`;
       changeLogs.push(logEntry);
       console.log(logEntry);
     }
 
-    // Write to log file
+    // Write logs
     if (changeLogs.length > 0) {
       if (!fs.existsSync('logs')) {
         fs.mkdirSync('logs');
       }
       fs.appendFileSync(LOG_FILE_PATH, changeLogs.join('\n') + '\n');
 
-      
+      // Send promotional emails
       const offerMessage = `🔥 Some Products Haven Promo Alert!\n\nWe're dropping prices on select products due to the amazing weather and holiday cheer!\n\nDon't miss your chance to grab them while stocks last!\n\nCheck them out now at our store! 🎂`;
       await sendPromotionalEmailToUsers(offerMessage);
     }
 
     console.log('✅ Stock and price adjusted based on weather and time.');
   } catch (error) {
-    console.error('❌ Error adjusting stock/price:', error);
+    console.error('❌ Error adjusting stock/price:', error.message);
   }
 };
 
+const runStockAdjustment = async () => {
+  try {
+    console.log('⏰ Running stock adjustment...');
+    const weather = await getWeatherData();
+    if (weather) {
+      console.log('🌡️ Current Temp:', weather.main.temp);
+    }
+    await adjustStockBasedOnWeather(weather);
+  } catch (error) {
+    console.error('❌ Error during scheduled stock adjustment:', error.message);
+  }
+};
 
 const scheduleStockAdjustment = () => {
+  // Run immediately
+  runStockAdjustment();
+
+  // Then schedule to run every 3 hours
   schedule.scheduleJob('0 */3 * * *', async () => {
-    console.log('⏰ Running scheduled stock adjustment...');
-    const weather = await getWeatherData();
-    console.log('🌡️ Current Temp:', weather?.main?.temp);
-    await adjustStockBasedOnWeather(weather);
+    await runStockAdjustment();
   });
 };
 
 const sendPromotionalEmailToUsers = async (message) => {
   try {
-    // Optionally only send to verified users
-    const users = await User.find({}); // or { isVerified: true }
+    const users = await User.find({});
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -155,9 +160,9 @@ const sendPromotionalEmailToUsers = async (message) => {
       },
     });
 
-    const emailPromises = users.map((user) =>
+    const emailPromises = users.map(user =>
       transporter.sendMail({
-        from: `"Cake Haven" <${process.env.EMAIL_USER}>`,
+        from: `"Product Haven" <${process.env.EMAIL_USER}>`,
         to: user.email,
         subject: '🎉 Special Offer Just for You!',
         text: message,
@@ -168,7 +173,7 @@ const sendPromotionalEmailToUsers = async (message) => {
     await Promise.all(emailPromises);
     console.log(`📧 Promotional emails sent to ${users.length} users.`);
   } catch (error) {
-    console.error('❌ Failed to send promotional emails:', error);
+    console.error('❌ Failed to send promotional emails:', error.message);
   }
 };
 
