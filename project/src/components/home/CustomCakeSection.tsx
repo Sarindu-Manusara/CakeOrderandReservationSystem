@@ -38,13 +38,13 @@ const CustomCakeSection: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl md:text-4xl font-serif mb-6">Create Your Dream Cake</h2>
-            <p className="text-accent-700 mb-6">
+            <h2 className="text-3xl md:text-4xl font-serif mb-6 text-blue-600">Create Your Dream Cake</h2>
+            <p className="text-accent-700 mb-6 text-yellow-600">
               Our custom cake service allows you to bring your vision to life. Whether it's a wedding, birthday, 
               or any special occasion, our expert bakers will create a masterpiece tailored just for you.
             </p>
             
-            <ul className="space-y-4 mb-8">
+            <ul className="space-y-4 mb-8 text-blue-400">
               {[
                 "Choose from a variety of flavors, fillings, and frostings",
                 "Select your cake size and shape",
@@ -67,9 +67,13 @@ const CustomCakeSection: React.FC = () => {
               ))}
             </ul>
             
-            <Link to="/custom-cake" className="btn btn-secondary">
-              Design Your Cake
-            </Link>
+            <Link 
+  to="/custom-cake" 
+  className="px-6 py-3 bg-yellow-500 hover:bg-yellow-500 font-semibold rounded-full shadow-md transition-all text-blue-700"
+>
+  Design Your Cake
+</Link>
+
           </motion.div>
         </div>
       </div>

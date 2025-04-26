@@ -54,7 +54,7 @@ const Testimonials: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-serif mb-4"
+            className="text-3xl md:text-4xl font-serif mb-4 text-blue-600"
           >
             Customer Love
           </motion.h2>
@@ -63,7 +63,7 @@ const Testimonials: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-accent-600 max-w-2xl mx-auto"
+            className="text-accent-600 max-w-2xl mx-auto text-yellow-600"
           >
             Don't just take our word for it. Here's what our customers have to say about our products and service.
           </motion.p>
@@ -95,11 +95,11 @@ const Testimonials: React.FC = () => {
                     ))}
                   </div>
                   
-                  <p className="text-accent-700 mb-6 italic">
+                  <p className="text-accent-700 mb-6 italic text-yellow-600">
                     "{testimonials[currentIndex].text}"
                   </p>
                   
-                  <h4 className="font-semibold text-lg">
+                  <h4 className="font-semibold text-lg text-blue-600">
                     {testimonials[currentIndex].name}
                   </h4>
                 </div>

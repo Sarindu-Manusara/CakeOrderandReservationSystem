@@ -48,7 +48,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {product.isAvailable && product.stock > 0 && (
             <button
               onClick={handleAddToCart}
-              className="bg-white text-secondary-800 p-3 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform"
+              className="bg-white text-blue-800 p-3 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform"
               aria-label="Add to cart"
             >
               <ShoppingCart size={20} />
@@ -59,7 +59,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       <Link to={`/${product.productType || 'products'}/${product._id}`} className="flex-1 p-6 flex flex-col">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xl font-serif group-hover:text-secondary-700 transition-colors">
+          <h3 className="text-xl font-serif group-hover:text-blue-700 transition-colors text-blue-600">
             {product.name}
           </h3>
           {product.weatherSensitive && (
@@ -69,14 +69,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
 
-        <div className="text-sm text-accent-600 mb-4 flex-grow">
+        <div className="text-sm text-accent-600 mb-4 flex-grow text-yellow-600">
           {product.description.length > 100
             ? product.description.substring(0, 100) + '...'
             : product.description}
         </div>
 
         <div className="flex justify-between items-center">
-          <span className="text-lg font-semibold text-secondary-800">
+          <span className="text-lg font-semibold text-blue-500">
             {formatCurrency(product.price)}
           </span>
 

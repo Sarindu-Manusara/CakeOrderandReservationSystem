@@ -14,6 +14,18 @@ const sizeOptions = [
   { id: 'xlarge', name: 'Extra Large (12")', price: 7500 },
 ];
 
+type FormValues = {
+  size: string;
+  flavor: string;
+  frosting: string;
+  decorations: string[];
+  message?: string;
+  specialRequests?: string;
+  isReservation?: boolean;
+  deliveryDate?: string;
+};
+
+
 const flavorOptions = [
   'Vanilla',
   'Chocolate',
@@ -69,7 +81,7 @@ const CustomCakePage: React.FC = () => {
   const [error, setError] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
   const [imagePreview, setImagePreview] = useState('https://images.pexels.com/photos/6208089/pexels-photo-6208089.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
-
+  
   const watchSize = watch('size');
   const watchFlavor = watch('flavor');
   const watchDecorations = watch('decorations');
@@ -137,8 +149,8 @@ const CustomCakePage: React.FC = () => {
     <div className="pt-24 pb-16 bg-primary-50">
       <div className="container-custom">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-serif mb-4">Design Your Perfect Cake</h1>
-          <p className="text-accent-600 max-w-2xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-serif mb-4 text-blue-600">Design Your Perfect Cake</h1>
+          <p className="text-accent-600 max-w-2xl mx-auto text-yellow-600">
             Create a custom cake tailored to your exact specifications.
             Our expert bakers will bring your vision to life.
           </p>
@@ -182,16 +194,16 @@ const CustomCakePage: React.FC = () => {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <h2 className="text-2xl font-serif mb-6">Choose Your Cake Basics</h2>
+                    <h2 className="text-2xl font-serif mb-6 text-blue-600">Choose Your Cake Basics</h2>
                     
                     {/* Size Selection */}
                     <div className="mb-6">
-                      <label className="label">Cake Size</label>
+                      <label className="label text-blue-500">Cake Size</label>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         {sizeOptions.map((size) => (
                           <label 
                             key={size.id} 
-                            className={`relative border rounded-lg p-4 cursor-pointer flex flex-col items-center text-center transition-all ${
+                            className={`text-yellow-600 relative border rounded-lg p-4 cursor-pointer flex flex-col items-center text-center transition-all ${
                               watchSize === size.id ? 'border-primary-500 bg-primary-50' : 'border-accent-200 hover:border-primary-300'
                             }`}
                           >
@@ -216,11 +228,11 @@ const CustomCakePage: React.FC = () => {
                     
                     {/* Flavor Selection */}
                     <div className="mb-6">
-                      <label htmlFor="flavor" className="label">Cake Flavor</label>
+                      <label htmlFor="flavor" className="label text-blue-500">Cake Flavor</label>
                       <select
                         id="flavor"
                         {...register('flavor', { required: 'Please select a flavor' })}
-                        className="input"
+                        className="input text-yellow-600"
                       >
                         {flavorOptions.map(flavor => (
                           <option key={flavor} value={flavor}>{flavor}</option>
@@ -231,11 +243,11 @@ const CustomCakePage: React.FC = () => {
                     
                     {/* Frosting Selection */}
                     <div className="mb-6">
-                      <label htmlFor="frosting" className="label">Frosting Type</label>
+                      <label htmlFor="frosting" className="label text-blue-500">Frosting Type</label>
                       <select
                         id="frosting"
                         {...register('frosting', { required: 'Please select a frosting' })}
-                        className="input"
+                        className="input text-yellow-600"
                       >
                         {frostingOptions.map(frosting => (
                           <option key={frosting} value={frosting}>{frosting}</option>
@@ -264,11 +276,11 @@ const CustomCakePage: React.FC = () => {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <h2 className="text-2xl font-serif mb-6">Choose Decorations & Extras</h2>
+                    <h2 className="text-2xl font-serif mb-6 text-blue-600">Choose Decorations & Extras</h2>
                     
                     {/* Decorations */}
                     <div className="mb-6">
-                      <label className="label">Decorations (Choose up to 3)</label>
+                      <label className="label text-blue-500">Decorations (Choose up to 3)</label>
                       <div className="grid grid-cols-2 gap-3">
                         <Controller
                           control={control}
@@ -279,7 +291,7 @@ const CustomCakePage: React.FC = () => {
                                 <label 
                                   key={decoration} 
                                   className={`
-                                    relative border rounded-lg p-3 cursor-pointer flex items-center transition-all
+                                    text-yellow-600 relative border rounded-lg p-3 cursor-pointer flex items-center transition-all
                                     ${field.value.includes(decoration) ? 'border-primary-500 bg-primary-50' : 'border-accent-200 hover:border-primary-300'}
                                   `}
                                 >
@@ -315,7 +327,7 @@ const CustomCakePage: React.FC = () => {
                     
                     {/* Message */}
                     <div className="mb-6">
-                      <label htmlFor="message" className="label">Cake Message (Optional)</label>
+                      <label htmlFor="message" className="label text-blue-500">Cake Message (Optional)</label>
                       <input
                         id="message"
                         type="text"
@@ -327,7 +339,7 @@ const CustomCakePage: React.FC = () => {
                     
                     {/* Special Requests */}
                     <div className="mb-6">
-                      <label htmlFor="specialRequests" className="label">Special Requests (Optional)</label>
+                      <label htmlFor="specialRequests" className="label text-blue-500">Special Requests (Optional)</label>
                       <textarea
                         id="specialRequests"
                         {...register('specialRequests')}
@@ -363,11 +375,11 @@ const CustomCakePage: React.FC = () => {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <h2 className="text-2xl font-serif mb-6">Review Your Custom Cake</h2>
+                    <h2 className="text-2xl font-serif mb-6 text-blue-600">Review Your Custom Cake</h2>
                     
                     <div className="space-y-4 mb-6">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">Size:</span>
+                        <span className="font-medium text-yellow-600">Size:</span>
                         <span>
                           {sizeOptions.find(size => size.id === watchSize)?.name}
                           <span className="ml-2 text-accent-500">
@@ -376,15 +388,15 @@ const CustomCakePage: React.FC = () => {
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">Flavor:</span>
+                        <span className="font-medium text-yellow-600">Flavor:</span>
                         <span>{watchFlavor}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">Frosting:</span>
+                        <span className="font-medium text-yellow-600">Frosting:</span>
                         <span>{watch('frosting')}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">Decorations:</span>
+                        <span className="font-medium text-yellow-600">Decorations:</span>
                         <span>
                           {watchDecorations.length > 0 
                             ? watchDecorations.join(', ') 
@@ -398,20 +410,20 @@ const CustomCakePage: React.FC = () => {
                       </div>
                       {watch('message') && (
                         <div className="flex items-center justify-between">
-                          <span className="font-medium">Message:</span>
+                          <span className="font-medium text-yellow-600">Message:</span>
                           <span>{watch('message')}</span>
                         </div>
                       )}
                       {watch('specialRequests') && (
                         <div className="flex flex-col">
-                          <span className="font-medium">Special Requests:</span>
+                          <span className="font-medium text-yellow-600">Special Requests:</span>
                           <span className="text-sm mt-1">{watch('specialRequests')}</span>
                         </div>
                       )}
                       
                       <hr className="my-4" />
                       
-                      <div className="flex items-center justify-between font-semibold text-lg">
+                      <div className="text-yellow-600 flex items-center justify-between font-semibold text-lg">
                         <span>Total Price:</span>
                         <span>{formatCurrency(calculatePrice())}</span>
                       </div>
@@ -427,7 +439,7 @@ const CustomCakePage: React.FC = () => {
                           className="mt-1"
                         />
                         <label htmlFor="isReservation" className="ml-2">
-                          <span className="font-medium block">Reserve for a future date</span>
+                          <span className="font-medium block text-blue-500">Reserve for a future date</span>
                           <span className="text-sm text-accent-600">
                             Select this if you want to reserve this cake for a specific date
                           </span>
@@ -436,7 +448,7 @@ const CustomCakePage: React.FC = () => {
                       
                       {watchIsReservation && (
                         <div className="animate-fade-in">
-                          <label htmlFor="deliveryDate" className="label">Reservation Date</label>
+                          <label htmlFor="deliveryDate" className="label text-blue-500">Reservation Date</label>
                           <div className="relative">
                             <input
                               type="date"
@@ -508,7 +520,7 @@ const CustomCakePage: React.FC = () => {
           {/* Preview Section */}
           <div className="md:col-span-2">
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-              <h3 className="text-xl font-serif mb-4">Your Cake Preview</h3>
+              <h3 className="text-xl font-serif mb-4 text-blue-600">Your Cake Preview</h3>
               
               <div className="rounded-lg overflow-hidden mb-6">
                 <img 
@@ -523,8 +535,8 @@ const CustomCakePage: React.FC = () => {
               </div>
               
               <div className="mt-6 bg-primary-50 rounded-lg p-4">
-                <h4 className="font-medium mb-2">Estimated Price</h4>
-                <div className="flex justify-between text-lg font-semibold">
+                <h4 className="font-medium mb-2 text-blue-600">Estimated Price</h4>
+                <div className="flex justify-between text-lg font-semibold text-yellow-600">
                   <span>Total:</span>
                   <span>{formatCurrency(calculatePrice())}</span>
                 </div>
@@ -534,7 +546,7 @@ const CustomCakePage: React.FC = () => {
               </div>
               
               <div className="mt-6">
-                <h4 className="font-medium mb-2">Need Help?</h4>
+                <h4 className="font-medium mb-2 text-blue-600">Need Help?</h4>
                 <p className="text-sm text-accent-600 mb-4">
                   Have questions about creating your custom cake? Our team is here to help!
                 </p>

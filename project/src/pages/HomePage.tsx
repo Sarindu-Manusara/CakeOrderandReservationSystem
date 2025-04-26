@@ -95,21 +95,21 @@ const HomePage: React.FC = () => {
       
       <section className="py-16 bg-primary text-neutral-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-serif font-bold mb-8 text-center">Featured Products</h2>
+          <h2 className="text-4xl font-serif font-bold mb-8 text-center text-blue-600">Featured Products</h2>
           <FeaturedProducts products={featuredProducts} />
         </div>
       </section>
 
       <section className="py-16 bg-secondary text-primary">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-serif font-bold mb-8 text-center">Create Your Custom Cake</h2>
+          <h2 className="text-4xl font-serif font-bold mb-8 text-center text-blue-600">Create Your Custom Cake</h2>
           <CustomCakeSection />
         </div>
       </section>
 
       <section className="py-16 bg-neutral-100">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-serif font-bold mb-8 text-center text-primary">Customer Testimonials</h2>
+          <h2 className="text-4xl font-serif font-bold mb-8 text-center text-primary text-blue-600">Customer Testimonials</h2>
           <Testimonials />
         </div>
       </section>

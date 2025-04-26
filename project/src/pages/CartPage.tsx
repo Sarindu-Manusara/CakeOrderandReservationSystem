@@ -181,14 +181,14 @@ const CartPage: React.FC = () => {
   if (!cartItems.length) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
+        <h1 className="text-3xl font-bold mb-6 text-blue-600">Your Cart</h1>
         <div className="bg-white rounded-lg shadow-md p-8 text-center">
           <ShoppingCart size={64} className="mx-auto mb-4 text-gray-400" />
-          <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
-          <p className="text-gray-600 mb-6">Looks like you haven't added any cakes to your cart yet.</p>
+          <h2 className="text-2xl font-semibold mb-2 text-blue-500">Your cart is empty</h2>
+          <p className="text-gray-600 mb-6 text-blue-500">Looks like you haven't added any cakes to your cart yet.</p>
           <Link 
             to="/products" 
-            className="bg-primary-500 text-white px-6 py-3 rounded-md font-medium hover:bg-primary-600 transition-colors"
+            className="bg-primary-500 text-blue-600 px-6 py-3 rounded-md font-medium hover:bg-primary-600 transition-colors"
           >
             Browse Cakes
           </Link>
@@ -199,10 +199,10 @@ const CartPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
+      <h1 className="text-3xl font-bold mb-6 text-blue-600">Your Cart</h1>
       
       {error && (
-        <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg">
+        <div className="mb-6 p-4 bg-blue-50 text-blue-600 rounded-lg">
           {error}
         </div>
       )}
@@ -219,7 +219,7 @@ const CartPage: React.FC = () => {
                     className="w-24 h-24 object-cover rounded-lg"
                   />
                   <div className="ml-6 flex-1">
-                    <h3 className="text-lg font-semibold">
+                    <h3 className="text-lg font-semibold text-blue-600">
                       {item.isCustom ? `Custom ${item.customCake?.flavor} Cake` : item.product?.name}
                     </h3>
                     {item.isCustom && item.customOptions && (
@@ -270,7 +270,7 @@ const CartPage: React.FC = () => {
 
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+            <h2 className="text-xl font-semibold mb-4 text-blue-600">Order Summary</h2>
             
             <div className="space-y-3">
               <div className="flex justify-between">
@@ -288,7 +288,7 @@ const CartPage: React.FC = () => {
                 <span>{formatCurrency(calculateTotal() * 0.1)}</span>
               </div>
               <div className="border-t pt-3 mt-3">
-                <div className="flex justify-between font-semibold text-lg">
+                <div className="flex justify-between font-semibold text-lg text-yellow-600">
                   <span>Total</span>
                   <span>
                     {formatCurrency(calculateTotal() + (orderType === 'delivery' ? 500 : 0) + (calculateTotal() * 0.1))}

@@ -60,8 +60,8 @@ const ProductsPage: React.FC = () => {
     <div className="pt-24 pb-16">
       <div className="container-custom">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-serif mb-4">Our Product Selection</h1>
-          <p className="text-accent-600 max-w-2xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-serif mb-4 text-blue-600">Our Product Selection</h1>
+          <p className="text-accent-600 max-w-2xl mx-auto text-yellow-600">
             Explore our full collection of sweet treats — from classic cakes to fresh cookies and baked goods.
           </p>
         </div>
@@ -97,8 +97,8 @@ const ProductsPage: React.FC = () => {
                 onClick={() => setSelectedCategory(category.id)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   selectedCategory === category.id
-                    ? 'bg-secondary-800 text-white'
-                    : 'bg-white text-accent-600 hover:bg-primary-100'
+                    ? 'bg-blue-800 text-yellow-600 '
+                    : 'bg-white text-yellow-600 hover:bg-primary-100'
                 }`}
               >
                 {category.name}
@@ -115,8 +115,8 @@ const ProductsPage: React.FC = () => {
                   onClick={() => setSelectedCategory(category.id)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                     selectedCategory === category.id
-                      ? 'bg-secondary-800 text-white'
-                      : 'bg-white text-accent-600 hover:bg-primary-100'
+                      ? 'bg-blue-600 text-yellow-600'
+                      : 'bg-white text-yellow-600 hover:bg-primary-100'
                   }`}
                 >
                   {category.name}

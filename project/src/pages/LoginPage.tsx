@@ -28,7 +28,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-lg shadow-md">
-      <h1 className="text-3xl font-bold text-center mb-6 text-pink-600">Login</h1>
+      <h1 className="text-3xl font-bold text-center mb-6 text-blue-600">Login</h1>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
@@ -47,7 +47,7 @@ const LoginPage: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="you@example.com"
           />
         </div>
@@ -57,7 +57,7 @@ const LoginPage: React.FC = () => {
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
             </label>
-            <Link to="/forgot-password" className="text-sm text-pink-600 hover:text-pink-500">
+            <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
               Forgot password?
             </Link>
           </div>
@@ -67,7 +67,7 @@ const LoginPage: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="••••••••"
           />
         </div>
@@ -76,7 +76,7 @@ const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50"
+            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
@@ -86,7 +86,7 @@ const LoginPage: React.FC = () => {
       <div className="text-center mt-6">
         <p className="text-sm text-gray-600">
           Don't have an account?{' '}
-          <Link to="/register" className="font-medium text-pink-600 hover:text-pink-500">
+          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
             Sign up
           </Link>
         </p>

@@ -110,10 +110,10 @@ const ProfilePage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">My Profile</h1>
+      <h1 className="text-3xl font-bold mb-6 text-blue-600">My Profile</h1>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Account Information</h2>
+        <h2 className="text-xl font-semibold mb-4 text-blue-600">Account Information</h2>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <p className="text-gray-600 mb-1">Name</p>
@@ -128,14 +128,14 @@ const ProfilePage = () => {
         <div className="flex gap-4 mt-4">
           <button
             onClick={logout}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
           >
             Logout
           </button>
           {user && (
             <button
               onClick={() => handleDeleteProfile(user._id)}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
             >
               Delete Profile
             </button>
@@ -144,16 +144,16 @@ const ProfilePage = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Order History</h2>
+        <h2 className="text-xl font-semibold mb-4 text-blue-600">Order History</h2>
         <div className="mt-4">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-100">
-                <th className="text-left p-2 border">Order ID</th>
-                <th className="text-left p-2 border">Date</th>
-                <th className="text-left p-2 border">Total</th>
-                <th className="text-left p-2 border">Status</th>
-                <th className="text-left p-2 border">Actions</th>
+                <th className="text-left p-2 border text-yellow-600">Order ID</th>
+                <th className="text-left p-2 border text-yellow-600">Date</th>
+                <th className="text-left p-2 border text-yellow-600">Total</th>
+                <th className="text-left p-2 border text-yellow-600">Status</th>
+                <th className="text-left p-2 border text-yellow-600">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -167,7 +167,7 @@ const ProfilePage = () => {
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-4 text-center text-gray-500">No orders found</td>
+                  <td colSpan={5} className="p-4 text-center text-gray-500 text-yellow-600">No orders found</td>
                 </tr>
               ) : (
                 orders.map((order) => {
@@ -189,7 +189,7 @@ const ProfilePage = () => {
                           className={`px-3 py-1 rounded text-white ${
                             order.isCancelled || order.isDelivered || order.isPaid
                               ? 'bg-gray-400 cursor-not-allowed'
-                              : 'bg-red-500 hover:bg-red-600'
+                              : 'bg-blue-600 hover:bg-blue-500'
                           }`}
                         >
                           {order.isCancelled ? 'Cancelled' : 'Cancel'}
@@ -205,7 +205,7 @@ const ProfilePage = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mt-8">
-        <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
+        <h2 className="text-xl font-semibold mb-4 text-blue-600">Personal Information</h2>
 
         {message && (
           <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded-md">

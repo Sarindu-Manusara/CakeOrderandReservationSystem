@@ -18,7 +18,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-serif mb-4"
+            className="text-3xl md:text-4xl font-serif mb-4 text-blue-600"
           >
             Our Signature Products
           </motion.h2>
@@ -27,7 +27,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-accent-600 max-w-2xl mx-auto"
+            className="max-w-2xl mx-auto text-yellow-600"
           >
             Explore our most popular products, each crafted with premium ingredients
             and designed to make your special occasions even more memorable.

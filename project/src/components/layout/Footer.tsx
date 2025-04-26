@@ -4,7 +4,7 @@ import { Cake, Instagram, Facebook, Twitter, MapPin, Phone, Mail } from 'lucide-
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-accent-900 text-white pt-16 pb-8">
+    <footer className="bg-blue-900 text-white pt-16 pb-8">
       <div className="container-custom">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* About */}

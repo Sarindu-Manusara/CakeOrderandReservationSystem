@@ -140,7 +140,7 @@ const PaymentPage: React.FC = () => {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600">Order Not Found</h2>
+          <h2 className="text-2xl font-bold text-blue-600">Order Not Found</h2>
           <p className="mt-2">The order you're looking for doesn't exist.</p>
         </div>
       </div>
@@ -150,10 +150,10 @@ const PaymentPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Payment Details</h1>
+        <h1 className="text-3xl font-bold mb-8 text-blue-600">Payment Details</h1>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg">
+          <div className="mb-6 p-4 bg-blue-50 text-red-600 rounded-lg">
             {error}
           </div>
         )}
@@ -161,7 +161,7 @@ const PaymentPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+              <h2 className="text-xl font-semibold mb-4 text-blue-600">Order Summary</h2>
               <div className="space-y-3">
                 {order.orderItems.map((item, index) => (
                   <div key={index} className="flex justify-between">
@@ -170,7 +170,7 @@ const PaymentPage: React.FC = () => {
                   </div>
                 ))}
                 <div className="border-t pt-3 mt-3">
-                  <div className="flex justify-between font-semibold text-lg">
+                  <div className="flex justify-between font-semibold text-lg text-yellow-600">
                     <span>Total</span>
                     <span>{formatCurrency(order.totalPrice)}</span>
                   </div>
@@ -182,7 +182,7 @@ const PaymentPage: React.FC = () => {
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex items-center text-primary-600 mb-2">
                   <Calendar size={20} className="mr-2" />
-                  <h3 className="font-semibold">Reservation Details</h3>
+                  <h3 className="font-semibold text-blue-600">Reservation Details</h3>
                 </div>
                 {order.orderItems.map((item, index) => (
                   item.reservationDate && (
@@ -196,7 +196,7 @@ const PaymentPage: React.FC = () => {
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex items-center text-primary-600 mb-2">
                   <Truck size={20} className="mr-2" />
-                  <h3 className="font-semibold">Delivery Details</h3>
+                  <h3 className="font-semibold text-blue-600">Delivery Details</h3>
                 </div>
                 <div className="text-gray-600">
                   <p>{order.shippingAddress?.address}</p>
@@ -210,7 +210,7 @@ const PaymentPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center mb-6">
               <CreditCard size={24} className="mr-2 text-primary-600" />
-              <h2 className="text-xl font-semibold">Payment Method</h2>
+              <h2 className="text-xl font-semibold text-blue-600">Payment Method</h2>
             </div>
 
             <form onSubmit={handlePayment} className="space-y-4">
