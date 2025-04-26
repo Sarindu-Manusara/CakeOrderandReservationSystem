@@ -1,6 +1,6 @@
 import axios from 'axios';
 import schedule from 'node-schedule';
-import Cake from '../models/productModel.js';
+import Product from '../models/productModel.js';
 import fs from 'fs';
 import path from 'path';
 import nodemailer from 'nodemailer';
@@ -51,35 +51,35 @@ const adjustStockBasedOnWeather = async (weather) => {
   const changeLogs = [];
 
   try {
-    const cakes = await Cake.find({});
+    const products = await Product.find({});
 
-    for (const cake of cakes) {
-      if (cake.weatherSensitive === false) continue;
+    for (const product of products) {
+      if (product.weatherSensitive === false) continue;
 
       let stockAdjustment = 0;
       let priceAdjustment = 0;
 
       // Weather-based stock + price
       if (isHot) {
-        if (cake.category.toLowerCase().includes('ice cream')) {
+        if (product.category.toLowerCase().includes('ice cream')) {
           stockAdjustment += 5;
           priceAdjustment -= 500;
-        } else if (cake.category.toLowerCase().includes('chocolate')) {
+        } else if (product.category.toLowerCase().includes('chocolate')) {
           stockAdjustment -= 2;
         }
       }
 
       if (isRaining) {
         if (
-          cake.category.toLowerCase().includes('chocolate') ||
-          cake.category.toLowerCase().includes('carrot')
+          product.category.toLowerCase().includes('chocolate') ||
+          product.category.toLowerCase().includes('carrot')
         ) {
           stockAdjustment += 3;
         }
       }
 
       if (isCold) {
-        if (cake.category.toLowerCase().includes('ice cream')) {
+        if (product.category.toLowerCase().includes('ice cream')) {
           stockAdjustment -= 3;
         } else {
           stockAdjustment += 2;
@@ -92,24 +92,24 @@ const adjustStockBasedOnWeather = async (weather) => {
         stockAdjustment += 5;
         priceAdjustment -= 300;
       }
-      if (summer && cake.category.toLowerCase().includes('fruit')) {
+      if (summer && product.category.toLowerCase().includes('fruit')) {
         stockAdjustment += 2;
       }
 
       // Final values
       const minStock = 5;
       const maxStock = 50;
-      const newStock = Math.max(minStock, Math.min(maxStock, cake.stock + stockAdjustment));
-      const newPrice = Math.max(0, cake.price + priceAdjustment);
+      const newStock = Math.max(minStock, Math.min(maxStock, product.stock + stockAdjustment));
+      const newPrice = Math.max(0, product.price + priceAdjustment);
 
       // Update DB
-      await Cake.findByIdAndUpdate(cake._id, {
+      await Product.findByIdAndUpdate(product._id, {
         stock: newStock,
         price: newPrice,
       });
 
       // Save change log
-      const logEntry = `${new Date().toISOString()} | ${cake.name} | Stock: ${cake.stock} → ${newStock} | Price: ${cake.price} → ${newPrice}`;
+      const logEntry = `${new Date().toISOString()} | ${product.name} | Stock: ${product.stock} → ${newStock} | Price: ${product.price} → ${newPrice}`;
       changeLogs.push(logEntry);
       console.log(logEntry);
     }
@@ -122,7 +122,7 @@ const adjustStockBasedOnWeather = async (weather) => {
       fs.appendFileSync(LOG_FILE_PATH, changeLogs.join('\n') + '\n');
 
       
-      const offerMessage = `🔥 Cake Haven Promo Alert!\n\nWe're dropping prices on select cakes due to the amazing weather and holiday cheer!\n\nDon't miss your chance to grab them while stocks last!\n\nCheck them out now at our store! 🎂`;
+      const offerMessage = `🔥 Some Products Haven Promo Alert!\n\nWe're dropping prices on select products due to the amazing weather and holiday cheer!\n\nDon't miss your chance to grab them while stocks last!\n\nCheck them out now at our store! 🎂`;
       await sendPromotionalEmailToUsers(offerMessage);
     }
 

@@ -1,44 +1,22 @@
-/** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
         primary: {
-          50: '#FCF9F0',
-          100: '#F5F3E5',
-          200: '#EAE5CC',
-          300: '#DFD7B3',
-          400: '#D4C999',
-          500: '#C8A951',
-          600: '#B99A49',
-          700: '#A98B41',
-          800: '#997C39',
-          900: '#8A6D31',
+          DEFAULT: '#002C77',  // Strong Blue
+          light: '#4F6BAE',
+          dark: '#001F54',
         },
         secondary: {
-          50: '#F9F0F1',
-          100: '#F3E0E3',
-          200: '#E6C1C7',
-          300: '#D9A3AC',
-          400: '#CC8490',
-          500: '#BF6575',
-          600: '#AF576A',
-          700: '#8F4555',
-          800: '#7D2027',
-          900: '#5E1A1E',
+          DEFAULT: '#FFB300',  // Bright Yellow
+          light: '#FFC933',
+          dark: '#CC8C00',
         },
-        accent: {
-          50: '#F6F4F1',
-          100: '#EDE9E3',
-          200: '#DDD4C6',
-          300: '#CCBEA9',
-          400: '#BBA98D',
-          500: '#AA9470',
-          600: '#95805C',
-          700: '#756648',
-          800: '#544A33',
-          900: '#3A2618',
+        neutral: {
+          50: '#FFFFFF',      // Pure white
+          100: '#F5F5F5',     // Light Gray
+          900: '#333333',     // Dark Text
         },
       },
       fontFamily: {
@@ -62,4 +40,4 @@ export default {
     },
   },
   plugins: [],
-};
+}

@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Hero from '../components/home/Hero';
 import CustomCakeSection from '../components/home/CustomCakeSection';
 import Testimonials from '../components/home/Testimonials';
 import AdminSection from '../components/home/AdminSection';
 import { Product } from '../types';
-import {AuthContext, useAuth} from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import FeaturedProducts from '../components/home/FeaturedProducts';
 
-// Temporary mock data until we connect to the backend
 const mockProducts: Product[] = [
   {
     _id: '1',
@@ -74,10 +73,7 @@ const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth(); 
 
-  
   useEffect(() => {
-    // When backend is ready, uncomment this to fetch real data
-    
     const fetchFeaturedProducts = async () => {
       try {
         setLoading(true);
@@ -91,16 +87,41 @@ const HomePage: React.FC = () => {
     };
     
     fetchFeaturedProducts();
-    
   }, []);
   
   return (
-    <div>
+    <div className="bg-neutral-100 text-neutral-900">
       <Hero />
-      <FeaturedProducts products={featuredProducts} />
-      <CustomCakeSection />
-      <Testimonials />
-      {user?.isAdmin && <AdminSection />}
+      
+      <section className="py-16 bg-primary text-neutral-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-serif font-bold mb-8 text-center">Featured Products</h2>
+          <FeaturedProducts products={featuredProducts} />
+        </div>
+      </section>
+
+      <section className="py-16 bg-secondary text-primary">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-serif font-bold mb-8 text-center">Create Your Custom Cake</h2>
+          <CustomCakeSection />
+        </div>
+      </section>
+
+      <section className="py-16 bg-neutral-100">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-serif font-bold mb-8 text-center text-primary">Customer Testimonials</h2>
+          <Testimonials />
+        </div>
+      </section>
+
+      {user?.isAdmin && (
+        <section className="py-16 bg-primary text-neutral-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-4xl font-serif font-bold mb-8 text-center">Admin Panel</h2>
+            <AdminSection />
+          </div>
+        </section>
+      )}
     </div>
   );
 };
